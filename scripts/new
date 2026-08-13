@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Create a workspace folder and initialize an inner git repo.
-# Usage: ./scripts/new <folder-name>
+# Usage: ./scripts/new <folder-name> [origin-url]
+# If origin-url is set, the next outer commit records a submodule link.
 set -euo pipefail
 
-if [[ $# -ne 1 ]]; then
-  echo "usage: $0 <folder-name>" >&2
+if [[ $# -lt 1 || $# -gt 2 ]]; then
+  echo "usage: $0 <folder-name> [origin-url]" >&2
   exit 1
 fi
 
@@ -28,5 +29,12 @@ git -C "$dir" \
   -c user.name="${GIT_AUTHOR_NAME:-codeloom}" \
   -c user.email="${GIT_AUTHOR_EMAIL:-codeloom@local}" \
   commit --allow-empty -q -m "Initial commit"
-echo "created workspace/$name (inner git repo ready)"
+
+if [[ $# -eq 2 ]]; then
+  git -C "$dir" remote add origin "$2"
+  echo "created workspace/$name with origin $2"
+  echo "outer git commit will store a submodule link to that repo"
+else
+  echo "created workspace/$name (inner git repo ready)"
+fi
 echo "cd workspace/$name"
