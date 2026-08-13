@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# Commit and push every inner workspace repo, then the outer repo,
+# using one commit message.
+# Usage: ./scripts/commit <message>
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+  echo "usage: $0 <commit-message>" >&2
+  exit 1
+fi
+
+msg="$*"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+is_git_repo() {
+  [[ -d "$1/.git" || -f "$1/.git" ]]
+}
+
+repo_dirty() {
+  [[ -n "$(git -C "$1" status --porcelain)" ]]
+}
+
+has_origin() {
+  git -C "$1" remote get-url origin >/dev/null 2>&1
+}
+
+commit_if_dirty() {
+  local dir="$1"
+  local label="$2"
+
+  if ! repo_dirty "$dir"; then
+    echo "== $label: clean, skip commit"
+    return 0
+  fi
+
+  echo "== $label: commit"
+  git -C "$dir" add -A
+  git -C "$dir" commit -m "$msg"
+}
+
+push_if_origin() {
+  local dir="$1"
+  local label="$2"
+
+  if ! has_origin "$dir"; then
+    echo "== $label: no origin, skip push"
+    return 0
+  fi
+
+  local branch
+  branch="$(git -C "$dir" rev-parse --abbrev-ref HEAD)"
+  if [[ "$branch" == "HEAD" ]]; then
+    echo "error: $label is in detached HEAD" >&2
+    exit 1
+  fi
+
+  echo "== $label: push origin $branch"
+  git -C "$dir" push -u origin "$branch"
+}
+
+echo "message: $msg"
+echo
+
+shopt -s nullglob
+for dir in "$ROOT"/workspace/*/; do
+  [[ -d "$dir" ]] || continue
+  is_git_repo "$dir" || continue
+  rel="${dir#"$ROOT"/}"
+  rel="${rel%/}"
+  commit_if_dirty "$dir" "$rel"
+  push_if_origin "$dir" "$rel"
+done
+
+echo
+"$ROOT/scripts/sync-workspace"
+
+commit_if_dirty "$ROOT" "codeloom (outer)"
+push_if_origin "$ROOT" "codeloom (outer)"
+
+echo
+echo "done"
