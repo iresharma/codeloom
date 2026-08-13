@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# Auto-init inner git repos under workspace/ and make the outer repo
+# track their working-tree files (not submodule gitlinks).
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+WORKSPACE="$ROOT/workspace"
+cd "$ROOT"
+
+is_git_repo() {
+  local dir="$1"
+  [[ -d "$dir/.git" || -f "$dir/.git" ]]
+}
+
+ensure_inner_commit() {
+  local dir="$1"
+  if git -C "$dir" rev-parse --verify HEAD >/dev/null 2>&1; then
+    return 0
+  fi
+  git -C "$dir" \
+    -c user.name="${GIT_AUTHOR_NAME:-codeloom}" \
+    -c user.email="${GIT_AUTHOR_EMAIL:-codeloom@local}" \
+    commit --allow-empty -q -m "Initial commit"
+}
+
+init_inner_repos() {
+  [[ -d "$WORKSPACE" ]] || return 0
+
+  local dir
+  for dir in "$WORKSPACE"/*/; do
+    [[ -d "$dir" ]] || continue
+    if ! is_git_repo "$dir"; then
+      git -C "$dir" init -b main -q
+      echo "initialized inner repo: ${dir#"$ROOT"/}"
+    fi
+    ensure_inner_commit "$dir"
+  done
+}
+
+unsubmodule_gitlinks() {
+  local path
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    git rm --cached -q -f -- "$path" || true
+  done < <(git ls-files -s | awk '$1 == "160000" {print $4}')
+}
+
+# git add ignores files inside nested repos; update-index does not.
+add_inner_files() {
+  [[ -d workspace ]] || return 0
+
+  local tmp rel
+  tmp="$(mktemp)"
+  while IFS= read -r -d '' rel; do
+    if git check-ignore -q -- "$rel" 2>/dev/null; then
+      continue
+    fi
+    printf '%s\0' "$rel"
+  done < <(
+    find workspace \
+      -type f \
+      -not -name '.git' \
+      -not -path '*/.git/*' \
+      -print0
+  ) >"$tmp"
+
+  if [[ -s "$tmp" ]]; then
+    git update-index --add -z --stdin <"$tmp"
+  fi
+  rm -f "$tmp"
+}
+
+prune_deleted_inner_files() {
+  local path
+  while IFS= read -r -d '' path; do
+    [[ "$path" == workspace/* ]] || continue
+    if [[ ! -e "$path" ]]; then
+      git update-index --remove -- "$path" || true
+    fi
+  done < <(git ls-files -z -- workspace)
+}
+
+init_inner_repos
+
+if git rev-parse --git-dir >/dev/null 2>&1; then
+  unsubmodule_gitlinks
+  add_inner_files
+  prune_deleted_inner_files
+fi

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+HOOKS_DIR="$ROOT/.git/hooks"
+
+if [[ ! -d "$ROOT/.git" ]]; then
+  echo "error: $ROOT is not a git repo" >&2
+  exit 1
+fi
+
+mkdir -p "$HOOKS_DIR"
+cp "$ROOT/.githooks/pre-commit" "$HOOKS_DIR/pre-commit"
+chmod +x "$HOOKS_DIR/pre-commit"
+echo "installed git hooks into .git/hooks"
