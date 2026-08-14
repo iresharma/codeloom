@@ -1,22 +1,38 @@
 #!/usr/bin/env bash
-# Create a workspace folder and initialize an inner git repo.
-# Usage: ./scripts/new <folder-name> [origin-url]
-# If origin-url is set, the next outer commit records a submodule link.
+# Create a workspace folder, initialize an inner git repo, and create
+# GitHub repo codeloom.<name> with origin attached.
+# Usage: ./scripts/new <folder-name> [--public]
+# Default visibility is private.
 set -euo pipefail
 
 if [[ $# -lt 1 || $# -gt 2 ]]; then
-  echo "usage: $0 <folder-name> [origin-url]" >&2
+  echo "usage: $0 <folder-name> [--public]" >&2
   exit 1
 fi
 
 name="$1"
+visibility="--private"
+if [[ $# -eq 2 ]]; then
+  if [[ "$2" != "--public" ]]; then
+    echo "usage: $0 <folder-name> [--public]" >&2
+    exit 1
+  fi
+  visibility="--public"
+fi
+
 if [[ "$name" == *"/"* || "$name" == "." || "$name" == ".." ]]; then
   echo "error: folder name must be a single path segment" >&2
   exit 1
 fi
 
+if ! command -v gh >/dev/null 2>&1; then
+  echo "error: gh CLI not found (install: https://cli.github.com/)" >&2
+  exit 1
+fi
+
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 dir="$ROOT/workspace/$name"
+repo_name="codeloom.$name"
 
 if [[ -e "$dir" ]]; then
   echo "error: $dir already exists" >&2
@@ -25,16 +41,23 @@ fi
 
 mkdir -p "$dir"
 git -C "$dir" init -b main -q
-git -C "$dir" \
-  -c user.name="${GIT_AUTHOR_NAME:-codeloom}" \
-  -c user.email="${GIT_AUTHOR_EMAIL:-codeloom@local}" \
-  commit --allow-empty -q -m "Initial commit"
 
-if [[ $# -eq 2 ]]; then
-  git -C "$dir" remote add origin "$2"
-  echo "created workspace/$name with origin $2"
-  echo "outer git commit will store a submodule link to that repo"
-else
-  echo "created workspace/$name (inner git repo ready)"
-fi
+identity="$("$ROOT/scripts/git-identity.sh")"
+author_name="${identity%%$'\t'*}"
+author_email="${identity#*$'\t'}"
+git -C "$dir" \
+  -c "user.name=$author_name" \
+  -c "user.email=$author_email" \
+  commit --allow-empty --author="$author_name <$author_email>" -q -m "Initial commit"
+
+echo "creating GitHub repo $repo_name..."
+gh repo create "$repo_name" \
+  --source="$dir" \
+  --remote=origin \
+  "$visibility" \
+  --push
+
+origin="$(git -C "$dir" remote get-url origin)"
+echo "created workspace/$name with origin $origin"
+echo "outer git commit will store a submodule link to that repo"
 echo "cd workspace/$name"

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Strip Cursor Agent attribution trailers from commit messages.
+set -euo pipefail
+
+msg_file="$1"
+tmp="$(mktemp)"
+sed -E \
+  -e '/^[[:space:]]*Co-authored-by:[[:space:]]*Cursor( Agent)?[[:space:]]*<[^>]*>[[:space:]]*$/Id' \
+  -e '/^[[:space:]]*Made-with:[[:space:]]*Cursor[[:space:]]*$/Id' \
+  "$msg_file" >"$tmp"
+mv "$tmp" "$msg_file"

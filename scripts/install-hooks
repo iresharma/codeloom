@@ -11,5 +11,6 @@ fi
 
 mkdir -p "$HOOKS_DIR"
 cp "$ROOT/.githooks/pre-commit" "$HOOKS_DIR/pre-commit"
-chmod +x "$HOOKS_DIR/pre-commit"
+cp "$ROOT/.githooks/commit-msg" "$HOOKS_DIR/commit-msg"
+chmod +x "$HOOKS_DIR/pre-commit" "$HOOKS_DIR/commit-msg"
 echo "installed git hooks into .git/hooks"

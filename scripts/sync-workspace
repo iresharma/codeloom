@@ -39,10 +39,14 @@ ensure_inner_commit() {
   if git -C "$dir" rev-parse --verify HEAD >/dev/null 2>&1; then
     return 0
   fi
+  local identity author_name author_email
+  identity="$("$ROOT/scripts/git-identity.sh")"
+  author_name="${identity%%$'\t'*}"
+  author_email="${identity#*$'\t'}"
   git -C "$dir" \
-    -c user.name="${GIT_AUTHOR_NAME:-codeloom}" \
-    -c user.email="${GIT_AUTHOR_EMAIL:-codeloom@local}" \
-    commit --allow-empty -q -m "Initial commit"
+    -c "user.name=$author_name" \
+    -c "user.email=$author_email" \
+    commit --allow-empty --author="$author_name <$author_email>" -q -m "Initial commit"
 }
 
 init_inner_repos() {
