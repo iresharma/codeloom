@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# Pull the latest from origin for inner workspace repos and/or the outer repo.
+# Usage:
+#   ./scripts/pull              # all inner repos, then outer
+#   ./scripts/pull <name>       # workspace/<name> only
+#   ./scripts/pull .            # outer repo only
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+usage() {
+  echo "usage: $0 [<repo>]" >&2
+  echo "  no args     pull every inner workspace repo, then the outer repo" >&2
+  echo "  <name>      pull workspace/<name> only" >&2
+  echo "  .           pull the outer repo only" >&2
+}
+
+if [[ $# -gt 1 ]]; then
+  usage
+  exit 1
+fi
+
+if [[ $# -eq 1 && ( "$1" == "-h" || "$1" == "--help" ) ]]; then
+  usage
+  exit 0
+fi
+
+is_git_repo() {
+  [[ -d "$1/.git" || -f "$1/.git" ]]
+}
+
+has_origin() {
+  git -C "$1" remote get-url origin >/dev/null 2>&1
+}
+
+list_inner_repos() {
+  local dir
+  shopt -s nullglob
+  for dir in "$ROOT"/workspace/*/; do
+    [[ -d "$dir" ]] || continue
+    is_git_repo "$dir" || continue
+    echo "${dir#"$ROOT"/workspace/}" | sed 's|/$||'
+  done
+}
+
+resolve_inner() {
+  local name="${1%/}"
+  local dir
+  if [[ "$name" == workspace/* ]]; then
+    dir="$ROOT/$name"
+  else
+    dir="$ROOT/workspace/$name"
+  fi
+
+  if [[ ! -d "$dir" ]] || ! is_git_repo "$dir"; then
+    echo "error: no workspace repo named '$name'" >&2
+    echo "available:" >&2
+    local repo
+    while IFS= read -r repo; do
+      echo "  $repo" >&2
+    done < <(list_inner_repos)
+    exit 1
+  fi
+  printf '%s\n' "$dir"
+}
+
+pull_repo() {
+  local dir="$1"
+  local label="$2"
+
+  if ! is_git_repo "$dir"; then
+    echo "error: $label is not a git repo" >&2
+    exit 1
+  fi
+
+  if ! has_origin "$dir"; then
+    echo "== $label: no origin, skip pull"
+    return 0
+  fi
+
+  local branch
+  branch="$(git -C "$dir" rev-parse --abbrev-ref HEAD)"
+  if [[ "$branch" == "HEAD" ]]; then
+    echo "error: $label is in detached HEAD" >&2
+    exit 1
+  fi
+
+  echo "== $label: pull origin $branch"
+  git -C "$dir" pull origin "$branch"
+}
+
+if [[ $# -eq 0 ]]; then
+  shopt -s nullglob
+  for dir in "$ROOT"/workspace/*/; do
+    [[ -d "$dir" ]] || continue
+    is_git_repo "$dir" || continue
+    rel="${dir#"$ROOT"/}"
+    rel="${rel%/}"
+    pull_repo "$dir" "$rel"
+  done
+  echo
+  pull_repo "$ROOT" "codeloom (outer)"
+  echo
+  echo "done"
+  exit 0
+fi
+
+target="$1"
+if [[ "$target" == "." ]]; then
+  pull_repo "$ROOT" "codeloom (outer)"
+else
+  dir="$(resolve_inner "$target")"
+  rel="${dir#"$ROOT"/}"
+  pull_repo "$dir" "$rel"
+fi
+
+echo
+echo "done"

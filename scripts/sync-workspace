@@ -8,6 +8,9 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 WORKSPACE="$ROOT/workspace"
 cd "$ROOT"
 
+# Cached newline-separated submodule paths (filled by load_submodule_paths).
+SUBMODULE_PATHS=""
+
 is_git_repo() {
   local dir="$1"
   [[ -d "$dir/.git" || -f "$dir/.git" ]]
@@ -22,15 +25,20 @@ submodule_paths() {
     | awk '{print $2}' || true
 }
 
+load_submodule_paths() {
+  SUBMODULE_PATHS="$(submodule_paths)"
+}
+
 is_submodule_path() {
   local rel="${1%/}"
   local sm
+  [[ -n "$SUBMODULE_PATHS" ]] || return 1
   while IFS= read -r sm; do
     [[ -n "$sm" ]] || continue
     if [[ "$rel" == "$sm" || "$rel" == "$sm"/* ]]; then
       return 0
     fi
-  done < <(submodule_paths)
+  done <<< "$SUBMODULE_PATHS"
   return 1
 }
 
@@ -67,7 +75,7 @@ register_submodules() {
   [[ -d workspace ]] || return 0
   git rev-parse --git-dir >/dev/null 2>&1 || return 0
 
-  local dir rel url sha path
+  local dir rel url sha path listed
   for dir in workspace/*/; do
     [[ -d "$dir" ]] || continue
     rel="${dir%/}"
@@ -76,10 +84,13 @@ register_submodules() {
 
     sha="$(git -C "$dir" rev-parse HEAD)"
 
+    listed="$(mktemp)"
+    git ls-files -z -- "$rel" >"$listed" || true
     while IFS= read -r -d '' path; do
       [[ "$path" == "$rel" ]] && continue
       git update-index --force-remove -- "$path" 2>/dev/null || true
-    done < <(git ls-files -z -- "$rel")
+    done < "$listed"
+    rm -f "$listed"
 
     git update-index --add --cacheinfo "160000,$sha,$rel"
     git config -f .gitmodules "submodule.$rel.path" "$rel"
@@ -102,35 +113,44 @@ unsubmodule_local_gitlinks() {
   done < <(git ls-files -s | awk '$1 == "160000" {print $4}')
 }
 
+# Do not walk submodule checkouts, nested .git dirs, or node_modules.
+# macOS bash 3.2 aborts (malloc: pointer being freed was not allocated)
+# if this function feeds tens of thousands of paths through process
+# substitution and per-file git/config forks.
 add_local_inner_files() {
   [[ -d workspace ]] || return 0
 
-  local tmp rel
+  local tmp find_out rel
   tmp="$(mktemp)"
+  find_out="$(mktemp)"
+
+  local prune=( \( -name .git -o -name node_modules )
+  local sm
+  while IFS= read -r sm; do
+    [[ -n "$sm" ]] || continue
+    prune+=(-o -path "$sm")
+  done <<< "$SUBMODULE_PATHS"
+  prune+=(\) -prune -o -type f -print0)
+
+  find workspace "${prune[@]}" >"$find_out"
+
   while IFS= read -r -d '' rel; do
-    if is_submodule_path "$rel"; then
-      continue
-    fi
     if git check-ignore -q -- "$rel" 2>/dev/null; then
       continue
     fi
     printf '%s\0' "$rel"
-  done < <(
-    find workspace \
-      -type f \
-      -not -name '.git' \
-      -not -path '*/.git/*' \
-      -print0
-  ) >"$tmp"
+  done < "$find_out" >"$tmp"
 
   if [[ -s "$tmp" ]]; then
     git update-index --add -z --stdin <"$tmp"
   fi
-  rm -f "$tmp"
+  rm -f "$tmp" "$find_out"
 }
 
 prune_deleted_local_files() {
-  local path
+  local path listed
+  listed="$(mktemp)"
+  git ls-files -z -- workspace >"$listed" || true
   while IFS= read -r -d '' path; do
     [[ "$path" == workspace/* ]] || continue
     if is_submodule_path "$path"; then
@@ -139,13 +159,15 @@ prune_deleted_local_files() {
     if [[ ! -e "$path" ]]; then
       git update-index --remove -- "$path" || true
     fi
-  done < <(git ls-files -z -- workspace)
+  done < "$listed"
+  rm -f "$listed"
 }
 
 init_inner_repos
 
 if git rev-parse --git-dir >/dev/null 2>&1; then
   register_submodules
+  load_submodule_paths
   unsubmodule_local_gitlinks
   add_local_inner_files
   prune_deleted_local_files

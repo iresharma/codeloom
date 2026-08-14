@@ -1,3 +1,6 @@
 [submodule "workspace/experiments"]
 	path = workspace/experiments
 	url = git@github.com:iresharma/codeloom.experiments.git
+[submodule "workspace/pages"]
+	path = workspace/pages
+	url = git@github.com:iresharma/codeloom.pages.git
