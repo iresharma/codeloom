@@ -26,6 +26,12 @@ if [[ $# -eq 1 && ( "$1" == "-h" || "$1" == "--help" ) ]]; then
   exit 0
 fi
 
+if [[ -f .gitmodules ]]; then
+  echo "== init/update submodules"
+  git submodule update --init --recursive
+  echo
+fi
+
 is_git_repo() {
   [[ -d "$1/.git" || -f "$1/.git" ]]
 }
@@ -82,8 +88,17 @@ pull_repo() {
   local branch
   branch="$(git -C "$dir" rev-parse --abbrev-ref HEAD)"
   if [[ "$branch" == "HEAD" ]]; then
-    echo "error: $label is in detached HEAD" >&2
-    exit 1
+    # git submodule update --init leaves submodules in detached HEAD at the
+    # recorded commit. Recover onto the tracking branch (default: main)
+    # before pulling.
+    branch="$(git -C "$dir" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||' || true)"
+    branch="${branch:-main}"
+    if ! git -C "$dir" show-ref --verify --quiet "refs/heads/$branch"; then
+      echo "error: $label is in detached HEAD and has no local '$branch' branch to recover onto" >&2
+      exit 1
+    fi
+    echo "== $label: detached HEAD, checking out $branch"
+    git -C "$dir" checkout -q "$branch"
   fi
 
   echo "== $label: pull origin $branch"
