@@ -4,3 +4,6 @@
 [submodule "workspace/pages"]
 	path = workspace/pages
 	url = git@github.com:iresharma/codeloom.pages.git
+[submodule "workspace/engine"]
+	path = workspace/engine
+	url = git@github.com:iresharma/codeloom.engine.git
