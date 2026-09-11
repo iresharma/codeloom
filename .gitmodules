@@ -7,3 +7,7 @@
 [submodule "workspace/engine"]
 	path = workspace/engine
 	url = git@github.com:iresharma/codeloom.engine.git
+[submodule "workspace/TUI"]
+	path = workspace/TUI
+	url = git@github.com:iresharma/codeloom.TUI.git
+
