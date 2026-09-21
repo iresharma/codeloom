@@ -11,3 +11,6 @@
 	path = workspace/TUI
 	url = git@github.com:iresharma/codeloom.TUI.git
 
+[submodule "workspace/cloud-controller"]
+	path = workspace/cloud-controller
+	url = git@github.com:iresharma/codeloom.cloud-controller.git

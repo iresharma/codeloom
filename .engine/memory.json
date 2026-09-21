@@ -1,0 +1,97 @@
+{
+  "files": {
+    "workspace/engine/runtime/session.py": {
+      "purpose": "Composition root / wiring layer for one workspace engine backend process (LLM, tools, LSP, MCP, skills, prompts) and protocol/persistence glue -- not where orchestration logic lives.",
+      "entry_points": "EngineSession._bind_loop constructs Orchestrator/Decider/Author; handle() dispatches wire commands.",
+      "constraints": "`Decider.decide_after_child` has no call site in `agents/orchestrator.py` \u2014 either intentionally staged for a later rollout phase or a missed wiring; worth confirming with whoever owns `docs/impl-p...",
+      "note": "EngineSession is the composition root / God-object for one workspace engine backend process. No orchestration business logic of its own (that is agents/orchestrator.py) -- wires LLM client, tools, LSP, MCP servers, skills, prompts; translates internal callbacks to the wire Command/Event protocol; persists via runtime/store/sqlite.py.",
+      "note_sha": "6d23bd2c2d8fb180220198368fdc06e53bdeb3e149384c1b3ef48127f10fd0c0",
+      "seen_sha": "6d23bd2c2d8fb180220198368fdc06e53bdeb3e149384c1b3ef48127f10fd0c0",
+      "action": "read",
+      "updated_at": "2026-09-17T22:00:59.343579+00:00"
+    },
+    "workspace/engine/tests/test_orchestrator_router.py": {
+      "purpose": "\"Jev\" is TypeSafe.ai's \"System One\" judgment API, used inside this engine as a pre-router in front of the orchestrator's normal LLM tool-calling loop. There is no separate \"JevAPI\" class name \u2014 \"Je...",
+      "entry_points": "workspace/engine/tests/test_orchestrator_router.py",
+      "constraints": "`Decider.decide_after_child` has no call site in `agents/orchestrator.py` \u2014 either intentionally staged for a later rollout phase or a missed wiring; worth confirming with whoever owns `docs/impl-p...",
+      "note": "",
+      "note_sha": "272269729bf16388336c8a235932962ce30ee9e9fea2748d13d66c40b1238f69",
+      "seen_sha": "272269729bf16388336c8a235932962ce30ee9e9fea2748d13d66c40b1238f69",
+      "action": "read",
+      "updated_at": "2026-09-17T21:49:48.948524+00:00"
+    },
+    "workspace/engine/runtime/config.py": {
+      "purpose": "EngineConfig dataclass + from_env(workspace) loader. Jev/router fields: router_enabled (bool, default False, env ENGINE_ROUTER_ENABLED), router_shadow_mode (bool, default True, env ENGINE_ROUTER_SH...",
+      "entry_points": "",
+      "constraints": "",
+      "note": "",
+      "note_sha": "3dc0cef7e14d5f993a3c54c11fe561328d3de1b046637f7ce6a46b791dec44b2",
+      "seen_sha": "3dc0cef7e14d5f993a3c54c11fe561328d3de1b046637f7ce6a46b791dec44b2",
+      "action": "read",
+      "updated_at": "2026-09-17T21:49:16.515189+00:00"
+    },
+    "workspace/engine/client_tui.py": {
+      "purpose": "TUI client. Contains JevCard (line ~293) and JevPanel (line ~343): render one RouterDecisionMade event each as a debug card (kind->action, confidence, flags shadow/escalate/handled, task preview, p...",
+      "entry_points": "",
+      "constraints": "",
+      "note": "",
+      "note_sha": "7c4365f89c8e7718e3e3f13918e32cfd7f31a5c0bf30f50ead9ca6c137fb1af5",
+      "seen_sha": "7c4365f89c8e7718e3e3f13918e32cfd7f31a5c0bf30f50ead9ca6c137fb1af5",
+      "action": "read",
+      "updated_at": "2026-09-17T21:49:16.509086+00:00"
+    },
+    "workspace/engine/protocol/events.py": {
+      "purpose": "Wire protocol events, incl. RouterDecisionMade (line ~260) \u2014 one Jev system_one() call the orchestrator made, with literal request/response payloads plus derived fields (action, confidence, escalat...",
+      "entry_points": "",
+      "constraints": "",
+      "note": "",
+      "note_sha": "4208318101bd4af94d6bb15b682520cfe51fa756d75cf997b2fe0ebe022568cd",
+      "seen_sha": "4208318101bd4af94d6bb15b682520cfe51fa756d75cf997b2fe0ebe022568cd",
+      "action": "read",
+      "updated_at": "2026-09-17T21:49:16.503495+00:00"
+    },
+    "workspace/engine/agents/orchestrator.py": {
+      "purpose": "Orchestrator agent loop. Relevant to Jev: constructs/wires Decider+Author (lines ~203-217) when config.router_enabled and no decider/author passed explicitly; Orchestrator.run() (line ~466) calls s...",
+      "entry_points": "_route_turn(task) (line 500): calls self._decider.decide_turn(task, memory_snapshot); on decision, if not shadow-mode and not escalate: ANSWER_DIRECTLY+memory_fresh -> Author.answer_directly (skips...",
+      "constraints": "router only consulted when self._decider is not None (built from EngineConfig.router_enabled + TypeSafeClient.from_env) and task is a top-level user turn, not an inbox/child-finished turn. Shadow m...",
+      "note": "",
+      "note_sha": "7cbb843730366fc4bf0e0beae0edf8acbb8676ee7d2a02a02d429cf1caad0b16",
+      "seen_sha": "7cbb843730366fc4bf0e0beae0edf8acbb8676ee7d2a02a02d429cf1caad0b16",
+      "action": "read",
+      "updated_at": "2026-09-17T21:49:16.498814+00:00"
+    },
+    "workspace/engine/agents/decide.py": {
+      "purpose": "Decider: the \"Jev pre-router\" that asks TypeSafe's Jev model a fixed judgment question at two seams \u2014 start of a user turn, and after a subagent child finishes \u2014 to decide whether the Orchestrator'...",
+      "entry_points": "Decider(client: TypeSafeClient, profiles: ProfileRegistry, confidence_floor: float); async decide_turn(user_message, memory_snapshot) -> Decision asks Choice \"action\" (one of registered profile nam...",
+      "constraints": "escalate = confidence < floor, always escalates (falls back to legacy loop) on TypeSafeError or missing answer. Decider assumes hard gates (spawn budget, survey-once dedup, worktree ownership) alre...",
+      "note": "",
+      "note_sha": "e1009ad6d20253b2d27bb566545e8d51ca0f0b86fa42af1a83dfa07594717e16",
+      "seen_sha": "e1009ad6d20253b2d27bb566545e8d51ca0f0b86fa42af1a83dfa07594717e16",
+      "action": "read",
+      "updated_at": "2026-09-17T21:49:01.516830+00:00"
+    },
+    "workspace/engine/llm/typesafe.py": {
+      "purpose": "TypeSafeClient: thin async HTTP wrapper over TypeSafe.ai's \"Jev\" System One judgment API (POST {base_url}/v1/systemone). Not an LLMProvider \u2014 no chat, no tool-calling, no free text; every call answ...",
+      "entry_points": "TypeSafeClient.from_env(workspace) builds client from env vars (returns None if no key); TypeSafeClient.system_one(state, questions, model=None) -> SystemOneResult does the POST; dataclasses Choice...",
+      "constraints": "Env vars: TYPESAFE_JEV_API_KEY (required, else from_env returns None), TYPESAFE_JEV_MODEL (default \"jev-latest\"), TYPESAFE_BASE_URL (default https://api.typesafe.ai), TYPESAFE_TIMEOUT_S (default 3....",
+      "note": "",
+      "note_sha": "2392e3d84d55a6c250c266dc4407f1d4295cad8c30c878fad47601763ce17754",
+      "seen_sha": "2392e3d84d55a6c250c266dc4407f1d4295cad8c30c878fad47601763ce17754",
+      "action": "read",
+      "updated_at": "2026-09-17T21:49:01.512686+00:00"
+    }
+  },
+  "engineering": [
+    {
+      "text": "EngineSession is the composition root / God-object for one workspace's engine backend process. It has no business logic of its own for orchestration (that's agents/orchestrator.py) \u2014 its job is wiring (LLM, tools, LSP, MCP, skills, prompts) plus translating between internal callbacks and the wire Command/Event protocol, plus persistence via runtime/store/sqlite.py. Any new IPC command needs a h...",
+      "updated_at": "2026-09-17T21:33:33.289072+00:00"
+    },
+    {
+      "text": "fully resolved. \"Jev\" = TypeSafe.ai System One API (`POST /v1/systemone`), implemented as `TypeSafeClient` in `llm/typesafe.py`, consumed by `Decider` in `agents/decide.py`, wired into `Orchestrator._route_turn` in `agents/orchestrator.py`, surfaced to clients via `RouterDecisionMade` event (`protocol/events.py`) and rendered in `client_tui.py`'s Jev panel. Config gates: `ENGINE_ROUTER_ENABLED`...",
+      "updated_at": "2026-09-17T21:49:48.945751+00:00"
+    }
+  ],
+  "product": [],
+  "cicd": [],
+  "other": []
+}
