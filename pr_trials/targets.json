@@ -1,0 +1,28 @@
+{
+  "targets": [
+    {
+      "name": "reach-auth-proxy",
+      "repo_url": "git@github.com:iresharma/reach-auth-proxy.git",
+      "prompt_file": "pr_trials/tasks/reach-auth-proxy.md",
+      "run_id": "reach-auth-proxy",
+      "settle": "pr",
+      "max_continues": 1
+    },
+    {
+      "name": "codeloom.engine",
+      "repo_url": "git@github.com:iresharma/codeloom.engine.git",
+      "prompt_file": "pr_trials/tasks/codeloom.engine.md",
+      "run_id": "codeloom-engine",
+      "settle": "pr",
+      "max_continues": 3
+    },
+    {
+      "name": "tracer",
+      "repo_url": "git@github.com:iresharma/tracer.git",
+      "prompt_file": "pr_trials/tasks/tracer.md",
+      "run_id": "tracer",
+      "settle": "pr",
+      "max_continues": 2
+    }
+  ]
+}
