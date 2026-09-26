@@ -1,0 +1,13 @@
+{
+  "targets": [
+    {
+      "name": "tracer",
+      "repo_url": "git@github.com:iresharma/tracer.git",
+      "prompt_file": "pr_trials/tasks/tracer.md",
+      "run_id": "tracer",
+      "settle": "pr",
+      "max_continues": 2,
+      "verify_command": "go build ./... && go vet ./... && go test ./..."
+    }
+  ]
+}

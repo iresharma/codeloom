@@ -128,6 +128,8 @@ def run_one_target(target: dict[str, Any], pushgateway_url: str, board: StatusBo
         "--settle", target.get("settle", "pr"),
         "--max-continues", str(target.get("max_continues", 1)),
     ]
+    if target.get("verify_command"):
+        run_cmd += ["--verify-command", target["verify_command"]]
     if pushgateway_url:
         run_cmd += ["--pushgateway-url", pushgateway_url]
 

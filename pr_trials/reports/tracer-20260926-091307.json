@@ -1,0 +1,4698 @@
+{
+  "meta": {
+    "repo": "iresharma/tracer",
+    "pr_url": "https://github.com/iresharma/tracer/pull/5",
+    "pr_number": 5,
+    "task_prompt": "This repo's own README, in the \"Status\" section, flags a real gap: \"there's no\nauthentication in front of the UI or API, so don't expose the collector\nService outside the cluster without putting your own auth in front of it.\"\n\nFix that. Add authentication in front of the collector's HTTP surface:\n\n- The JSON/query API under `internal/collector/queryapi` and\n  `internal/collector/ingest`.\n- The server-rendered HTMX/Alpine UI under `internal/collector/ui`.\n\nUse a simple, self-hosted scheme appropriate for a homelab project \u2014 a\ntoken or basic-auth credential supplied via config/env, checked in\nmiddleware \u2014 not an external OAuth provider. Wire it through the same\nconfig mechanism the rest of the collector's settings already use (check how\nexisting ConfigMap-driven settings are read). Make sure the agent-to-collector\ningest path (`POST /api/v1/logs`) still works \u2014 that's service-to-service, not\na browser, so it likely needs its own credential rather than sharing the UI's.\n\nThis repo has real test coverage and a real convention for it. Match that\nconvention:\n\n- Add table-driven `_test.go` files for the new middleware/auth logic, in the\n  same style as the existing tests in `internal/collector/*`.\n- Run `go test ./...`, `make vet`, and `make fmt` before finishing, and make\n  sure all three are clean \u2014 don't declare the task done otherwise.\n- Update `deploy/k8s/*.yaml` and the README/config docs if the new auth\n  setting needs to be provided at deploy time.\n\nWhen you are done, close with a single clear paragraph summarizing exactly\nwhat you changed and why \u2014 that summary becomes the pull request's title and\nbody verbatim, so make it read like a real PR description, not an internal\nnote.\n",
+    "run_id": "tracer",
+    "started_at": 1790393211.6135192,
+    "finished_at": 1790393966.093091,
+    "engine_commit": "c9d639a94ca06c38b69de8c86b05728e2926b470",
+    "target_commit_base": "274b0ed277f93f5a7b78ba3639e8fdadd578810b",
+    "target_commit_head": "56e3d31ca7c940963596a4594bcfc71b165d9e76",
+    "settle": "pr",
+    "run_status": "ok",
+    "run_detail": ""
+  },
+  "stats": {
+    "session_id": "ec28d8713836452b94cf825a814c99e5",
+    "cost": 1.4931706999999996,
+    "prompt_tokens": 2702685,
+    "completion_tokens": 51278,
+    "cached_tokens": 2511411,
+    "total_tokens": 2753963,
+    "requests": 77,
+    "turns": 77,
+    "tool_calls": 119,
+    "elapsed_s": 120.6660770419985,
+    "agents": [
+      {
+        "profile": "ask",
+        "agent_id": "6a2abdf7973047e2b8576a7fe034fa71",
+        "cost": 0.2817218
+      },
+      {
+        "profile": "coder",
+        "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+        "cost": 0.7879686
+      },
+      {
+        "profile": "reviewer",
+        "agent_id": "38fac7633a02442585b3740ff8a8101a",
+        "cost": 0.1670587
+      }
+    ],
+    "files_changed": 0,
+    "diffstat": "",
+    "error": "",
+    "prometheus_metrics": {
+      "engine_agent_cost_usd": [
+        {
+          "labels": {
+            "agent_id": "",
+            "profile": "orchestrator"
+          },
+          "value": 0.2564216
+        },
+        {
+          "labels": {
+            "agent_id": "38fac7633a02442585b3740ff8a8101a",
+            "profile": "reviewer"
+          },
+          "value": 0.1670587
+        },
+        {
+          "labels": {
+            "agent_id": "6a2abdf7973047e2b8576a7fe034fa71",
+            "profile": "ask"
+          },
+          "value": 0.2817218
+        },
+        {
+          "labels": {
+            "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+            "profile": "coder"
+          },
+          "value": 0.7879686
+        }
+      ],
+      "engine_agent_duration_seconds": [
+        {
+          "labels": {
+            "agent_id": "38fac7633a02442585b3740ff8a8101a",
+            "profile": "reviewer"
+          },
+          "value": 85.18584849999752
+        },
+        {
+          "labels": {
+            "agent_id": "6a2abdf7973047e2b8576a7fe034fa71",
+            "profile": "ask"
+          },
+          "value": 161.51854808302596
+        },
+        {
+          "labels": {
+            "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+            "profile": "coder"
+          },
+          "value": 381.22743249998894
+        }
+      ],
+      "engine_agent_finished": [
+        {
+          "labels": {
+            "agent_id": "38fac7633a02442585b3740ff8a8101a",
+            "profile": "reviewer",
+            "status": "ok"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "6a2abdf7973047e2b8576a7fe034fa71",
+            "profile": "ask",
+            "status": "ok"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+            "profile": "coder",
+            "status": "ok"
+          },
+          "value": 1
+        }
+      ],
+      "engine_agent_requests": [
+        {
+          "labels": {
+            "agent_id": "",
+            "profile": "orchestrator"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "agent_id": "38fac7633a02442585b3740ff8a8101a",
+            "profile": "reviewer"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "agent_id": "6a2abdf7973047e2b8576a7fe034fa71",
+            "profile": "ask"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+            "profile": "coder"
+          },
+          "value": 43
+        }
+      ],
+      "engine_agent_spawned": [
+        {
+          "labels": {
+            "agent_id": "38fac7633a02442585b3740ff8a8101a",
+            "profile": "reviewer"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "6a2abdf7973047e2b8576a7fe034fa71",
+            "profile": "ask"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+            "profile": "coder"
+          },
+          "value": 1
+        }
+      ],
+      "engine_agent_tokens": [
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "cached",
+            "profile": "orchestrator"
+          },
+          "value": 96513
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "completion",
+            "profile": "orchestrator"
+          },
+          "value": 10910
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "prompt",
+            "profile": "orchestrator"
+          },
+          "value": 147724
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "reasoning",
+            "profile": "orchestrator"
+          },
+          "value": 1466
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "total",
+            "profile": "orchestrator"
+          },
+          "value": 158634
+        },
+        {
+          "labels": {
+            "agent_id": "38fac7633a02442585b3740ff8a8101a",
+            "kind": "cached",
+            "profile": "reviewer"
+          },
+          "value": 215101
+        },
+        {
+          "labels": {
+            "agent_id": "38fac7633a02442585b3740ff8a8101a",
+            "kind": "completion",
+            "profile": "reviewer"
+          },
+          "value": 4104
+        },
+        {
+          "labels": {
+            "agent_id": "38fac7633a02442585b3740ff8a8101a",
+            "kind": "prompt",
+            "profile": "reviewer"
+          },
+          "value": 248304
+        },
+        {
+          "labels": {
+            "agent_id": "38fac7633a02442585b3740ff8a8101a",
+            "kind": "reasoning",
+            "profile": "reviewer"
+          },
+          "value": 291
+        },
+        {
+          "labels": {
+            "agent_id": "38fac7633a02442585b3740ff8a8101a",
+            "kind": "total",
+            "profile": "reviewer"
+          },
+          "value": 252408
+        },
+        {
+          "labels": {
+            "agent_id": "6a2abdf7973047e2b8576a7fe034fa71",
+            "kind": "cached",
+            "profile": "ask"
+          },
+          "value": 329539
+        },
+        {
+          "labels": {
+            "agent_id": "6a2abdf7973047e2b8576a7fe034fa71",
+            "kind": "completion",
+            "profile": "ask"
+          },
+          "value": 12385
+        },
+        {
+          "labels": {
+            "agent_id": "6a2abdf7973047e2b8576a7fe034fa71",
+            "kind": "prompt",
+            "profile": "ask"
+          },
+          "value": 366331
+        },
+        {
+          "labels": {
+            "agent_id": "6a2abdf7973047e2b8576a7fe034fa71",
+            "kind": "reasoning",
+            "profile": "ask"
+          },
+          "value": 441
+        },
+        {
+          "labels": {
+            "agent_id": "6a2abdf7973047e2b8576a7fe034fa71",
+            "kind": "total",
+            "profile": "ask"
+          },
+          "value": 378716
+        },
+        {
+          "labels": {
+            "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+            "kind": "cached",
+            "profile": "coder"
+          },
+          "value": 1870258
+        },
+        {
+          "labels": {
+            "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+            "kind": "completion",
+            "profile": "coder"
+          },
+          "value": 23879
+        },
+        {
+          "labels": {
+            "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+            "kind": "prompt",
+            "profile": "coder"
+          },
+          "value": 1940326
+        },
+        {
+          "labels": {
+            "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+            "kind": "reasoning",
+            "profile": "coder"
+          },
+          "value": 1998
+        },
+        {
+          "labels": {
+            "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+            "kind": "total",
+            "profile": "coder"
+          },
+          "value": 1964205
+        }
+      ],
+      "engine_judge_cost_usd": 0,
+      "engine_judge_decisions": [
+        {
+          "labels": {
+            "enforced": "false",
+            "outcome": "flag",
+            "tag": "write_gate"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "allow",
+            "tag": "call_verify"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "edit_multi_file",
+            "tag": "intent_route"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "extend",
+            "tag": "loop_control"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "prompt",
+            "tag": "exec_approval"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "ranked",
+            "tag": "search_rerank"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "summary",
+            "tag": "merge_gate"
+          },
+          "value": 2
+        }
+      ],
+      "engine_judge_info": [
+        {
+          "labels": {
+            "model": "jev-latest"
+          },
+          "value": 1
+        }
+      ],
+      "engine_judge_request_duration_seconds_bucket": [
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.4"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.8"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "1.5"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "3"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "+Inf"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.4"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.8"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "1.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "3"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.4"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.8"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "1.5"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "3"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "+Inf"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.4"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.8"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "1.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "3"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.4"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.8"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "1.5"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "3"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "+Inf"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.4"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.8"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "1.5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "3"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "+Inf"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.4"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.8"
+          },
+          "value": 45
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "1.5"
+          },
+          "value": 46
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "3"
+          },
+          "value": 46
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "+Inf"
+          },
+          "value": 46
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.4"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.8"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "1.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "3"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.4"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.8"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "1.5"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "3"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "+Inf"
+          },
+          "value": 11
+        }
+      ],
+      "engine_judge_request_duration_seconds_sum": [
+        {
+          "labels": {
+            "tag": "call_verify"
+          },
+          "value": 7.367999999999999
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage"
+          },
+          "value": 0.795
+        },
+        {
+          "labels": {
+            "tag": "exec_approval"
+          },
+          "value": 2.078
+        },
+        {
+          "labels": {
+            "tag": "intent_route"
+          },
+          "value": 0.683
+        },
+        {
+          "labels": {
+            "tag": "loop_control"
+          },
+          "value": 9.831999999999999
+        },
+        {
+          "labels": {
+            "tag": "merge_gate"
+          },
+          "value": 1.7530000000000001
+        },
+        {
+          "labels": {
+            "tag": "result_screen"
+          },
+          "value": 21.046
+        },
+        {
+          "labels": {
+            "tag": "search_rerank"
+          },
+          "value": 0.408
+        },
+        {
+          "labels": {
+            "tag": "write_gate"
+          },
+          "value": 6.795999999999999
+        }
+      ],
+      "engine_judge_request_duration_seconds_count": [
+        {
+          "labels": {
+            "tag": "call_verify"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "exec_approval"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "tag": "intent_route"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "loop_control"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "tag": "merge_gate"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "tag": "result_screen"
+          },
+          "value": 46
+        },
+        {
+          "labels": {
+            "tag": "search_rerank"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "write_gate"
+          },
+          "value": 11
+        }
+      ],
+      "engine_judge_request_duration_seconds_created": [
+        {
+          "labels": {
+            "tag": "call_verify"
+          },
+          "value": 1790393537.8699489
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage"
+          },
+          "value": 1790393539.9150798
+        },
+        {
+          "labels": {
+            "tag": "exec_approval"
+          },
+          "value": 1790393624.143123
+        },
+        {
+          "labels": {
+            "tag": "intent_route"
+          },
+          "value": 1790393213.299125
+        },
+        {
+          "labels": {
+            "tag": "loop_control"
+          },
+          "value": 1790393236.354495
+        },
+        {
+          "labels": {
+            "tag": "merge_gate"
+          },
+          "value": 1790393817.78854
+        },
+        {
+          "labels": {
+            "tag": "result_screen"
+          },
+          "value": 1790393239.115285
+        },
+        {
+          "labels": {
+            "tag": "search_rerank"
+          },
+          "value": 1790393254.897814
+        },
+        {
+          "labels": {
+            "tag": "write_gate"
+          },
+          "value": 1790393530.734426
+        }
+      ],
+      "engine_judge_requests": [
+        {
+          "labels": {
+            "result": "cache",
+            "tag": "result_screen"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "call_verify"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "exec_approval"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "loop_control"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "merge_gate"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "result_screen"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "search_rerank"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "write_gate"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "call_verify"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "diagnostics_triage"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "exec_approval"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "intent_route"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "loop_control"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "merge_gate"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "result_screen"
+          },
+          "value": 46
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "search_rerank"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "write_gate"
+          },
+          "value": 11
+        }
+      ],
+      "engine_judge_tokens": [
+        {
+          "labels": {
+            "kind": "input"
+          },
+          "value": 186140
+        },
+        {
+          "labels": {
+            "kind": "output"
+          },
+          "value": 8274
+        },
+        {
+          "labels": {
+            "kind": "total"
+          },
+          "value": 194414
+        }
+      ],
+      "engine_llm_request_duration_seconds_bucket": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "5"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "10"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "20"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "30"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "60"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "120"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "300"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "600"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "+Inf"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "5"
+          },
+          "value": 21
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "10"
+          },
+          "value": 32
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "20"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "30"
+          },
+          "value": 43
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "60"
+          },
+          "value": 43
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "120"
+          },
+          "value": 43
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "300"
+          },
+          "value": 43
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "600"
+          },
+          "value": 43
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "+Inf"
+          },
+          "value": 43
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "5"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "10"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "20"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "30"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "60"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "120"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "300"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "600"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "+Inf"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "5"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "10"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "20"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "30"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "60"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "120"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "300"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "600"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "+Inf"
+          },
+          "value": 9
+        }
+      ],
+      "engine_llm_request_duration_seconds_sum": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask"
+          },
+          "value": 151.76004812604515
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder"
+          },
+          "value": 305.1427220781334
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator"
+          },
+          "value": 129.5475744580035
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer"
+          },
+          "value": 64.01556533307303
+        }
+      ],
+      "engine_llm_request_duration_seconds_count": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder"
+          },
+          "value": 43
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer"
+          },
+          "value": 9
+        }
+      ],
+      "engine_llm_request_duration_seconds_created": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask"
+          },
+          "value": 1790393230.711143
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder"
+          },
+          "value": 1790393440.373706
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator"
+          },
+          "value": 1790393226.1333928
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer"
+          },
+          "value": 1790393844.015448
+        }
+      ],
+      "engine_model_cost_usd": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 1.4931706999999996
+        }
+      ],
+      "engine_model_requests": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 77
+        }
+      ],
+      "engine_model_tokens": [
+        {
+          "labels": {
+            "kind": "cached",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 2511411
+        },
+        {
+          "labels": {
+            "kind": "completion",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 51278
+        },
+        {
+          "labels": {
+            "kind": "prompt",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 2702685
+        },
+        {
+          "labels": {
+            "kind": "reasoning",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 4196
+        },
+        {
+          "labels": {
+            "kind": "total",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 2753963
+        }
+      ],
+      "engine_run_agents_live": 0,
+      "engine_run_agents_spawned": 3,
+      "engine_run_cost_usd": 1.4931706999999996,
+      "engine_run_elapsed_seconds": 120.6660770419985,
+      "engine_run_files_edited": 19,
+      "engine_run_files_unique": 15,
+      "engine_run_info": [
+        {
+          "labels": {
+            "session_id": "ec28d8713836452b94cf825a814c99e5",
+            "workspace": "repo"
+          },
+          "value": 1
+        }
+      ],
+      "engine_run_last_turn_cost_usd": 0.0135212,
+      "engine_run_last_turn_tokens": 27672,
+      "engine_run_llm_turns": 77,
+      "engine_run_requests": 77,
+      "engine_run_tokens": [
+        {
+          "labels": {
+            "kind": "cached"
+          },
+          "value": 2511411
+        },
+        {
+          "labels": {
+            "kind": "completion"
+          },
+          "value": 51278
+        },
+        {
+          "labels": {
+            "kind": "prompt"
+          },
+          "value": 2702685
+        },
+        {
+          "labels": {
+            "kind": "reasoning"
+          },
+          "value": 4196
+        },
+        {
+          "labels": {
+            "kind": "total"
+          },
+          "value": 2753963
+        }
+      ],
+      "engine_run_tool_calls": 119,
+      "engine_tool_calls": [
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "list_files"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 21
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "create_file"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "list_files"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "orchestrator",
+            "tool": "reviewer"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "run_verify"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "search"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "todo_scan"
+          },
+          "value": 2
+        }
+      ],
+      "engine_tool_duration_seconds_bucket": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.5"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "1"
+          },
+          "value": 21
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "2"
+          },
+          "value": 21
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "5"
+          },
+          "value": 21
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "15"
+          },
+          "value": 21
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "30"
+          },
+          "value": 21
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "60"
+          },
+          "value": 21
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "120"
+          },
+          "value": 21
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "+Inf"
+          },
+          "value": 21
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.01"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.05"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.1"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.5"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "1"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "2"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "5"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "15"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "30"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "60"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "120"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "+Inf"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.05"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.1"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "1"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "2"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "5"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "15"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "30"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "60"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "120"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "+Inf"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "0.5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "15"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "30"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "60"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "120"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "+Inf"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.05"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.1"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.5"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "1"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "2"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "5"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "15"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "30"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "60"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "120"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "+Inf"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.01"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.05"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.1"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.5"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "1"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "2"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "5"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "15"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "30"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "60"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "120"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "+Inf"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.01"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.05"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.1"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.5"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "1"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "2"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "5"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "15"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "30"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "60"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "120"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "+Inf"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "5"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "15"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "30"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "60"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "120"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "+Inf"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.05"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.1"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.5"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "1"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "2"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "5"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "15"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "30"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "60"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "120"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "+Inf"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "2"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "5"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "15"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "30"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "60"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "120"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "+Inf"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "1"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "2"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "5"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "15"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "30"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "60"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "120"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "+Inf"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "0.5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "15"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "30"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "60"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "120"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "+Inf"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "0.05"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "0.1"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "0.5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "1"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "2"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "15"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "30"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "60"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "120"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "+Inf"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "0.01"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "0.05"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "0.1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "0.5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "2"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "15"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "30"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "60"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "120"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "+Inf"
+          },
+          "value": 2
+        }
+      ],
+      "engine_tool_duration_seconds_sum": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files"
+          },
+          "value": 0.013
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 9.899999999999997
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 0.023
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 1.418
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file"
+          },
+          "value": 10.822000000000001
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 0.558
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files"
+          },
+          "value": 0.014
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 3.6449999999999996
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 0.02500000000000001
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 18.237000000000002
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 0.9400000000000001
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 31.155
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 0.077
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer"
+          },
+          "value": 0.001
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 0.071
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 0.082
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 3.4589999999999996
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify"
+          },
+          "value": 13.355
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search"
+          },
+          "value": 0.105
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan"
+          },
+          "value": 0
+        }
+      ],
+      "engine_tool_duration_seconds_count": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 21
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan"
+          },
+          "value": 2
+        }
+      ],
+      "engine_tool_duration_seconds_created": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files"
+          },
+          "value": 1790393235.902381
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 1790393239.116312
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 1790393326.7382011
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 1790393234.040724
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file"
+          },
+          "value": 1790393499.3941069
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 1790393650.79752
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files"
+          },
+          "value": 1790393594.739247
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 1790393440.3764758
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 1790393786.562909
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 1790393626.7747068
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 1790393449.3169222
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 1790393531.7492192
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 1790393226.134776
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 1790393436.562942
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer"
+          },
+          "value": 1790393837.617781
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 1790393844.171807
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 1790393844.0997272
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 1790393849.127669
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify"
+          },
+          "value": 1790393869.6981068
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search"
+          },
+          "value": 1790393857.277571
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan"
+          },
+          "value": 1790393863.8722901
+        }
+      ],
+      "engine_worktrees_settled": [
+        {
+          "labels": {
+            "action": "pr",
+            "ok": "true",
+            "profile": "coder"
+          },
+          "value": 1
+        }
+      ],
+      "push_failure_time_seconds": 0,
+      "push_time_seconds": 1790393965.9709187
+    }
+  },
+  "verification": {
+    "language": "go",
+    "builds": true,
+    "new_vet_issues": 0,
+    "vet_clean": true,
+    "has_tests": true,
+    "tests_pass": true
+  },
+  "code_review": {
+    "verdict": "needs-changes",
+    "summary": "A clean, small implementation that matches the repo's style. It adds a new internal/collector/auth package with a bearer-token check for POST /api/v1/logs and HTTP Basic auth for the UI and queryapi routes. Both use constant-time comparison. They are applied inside the existing route()/instrument() helper, so metrics labels stay the same, and /healthz, /readyz, /metrics and /static/ are correctly left open. Config reuses getEnv, the agent forwarder sends the token, and new Secrets are wired in through secretKeyRef. The core middleware is correct and its unit tests are meaningful: the reviewer's mutation run showed the ingest table catches a disabled comparison. Four things should be fixed before merge. (1) The shipped Secret comment and README claim that applying the placeholders as-is leaves auth off and logs a warning. The opposite is true: the placeholders are non-empty, so auth turns on with credentials that are published in the repo, and no warning is logged. (2) The default is still fail-open whenever the env vars are empty, and that default is kept on purpose. (3) The new forwarder test has an unsynchronized data race, and its negative case passes even if no request arrives. (4) Nothing tests the collector.go wiring that decides which routes are protected and which are exempt. Smaller issues: the Bearer scheme match is case-sensitive, the Basic-auth check short-circuits on the username, and the devcluster playground was not updated for the new auth prompt.",
+    "findings": [
+      {
+        "id": "code-1",
+        "category": "security",
+        "severity": "medium",
+        "file": "deploy/k8s/collector-secret.yaml",
+        "line": 17,
+        "summary": "The Secret comment says that applying the placeholder file as-is leaves the surface unauthenticated and logs a warning, but the non-empty REPLACE_ME_* values actually turn auth on with credentials anyone can read in the repo.",
+        "failure_scenario": "An operator follows the README ('apply deploy/k8s/*.yaml') and applies collector-secret.yaml unchanged. INGEST_AUTH_TOKEN becomes 'REPLACE_ME_INGEST_TOKEN' and UI_AUTH_PASSWORD becomes 'REPLACE_ME_UI_PASSWORD', both non-empty, so RequireBasicAuth and RequireIngestToken enforce them and WarnIfUnset stays silent. The operator believes the comment and thinks they will be warned. Anyone who has read the public repo can log in or inject logs. The README hunk ('Leaving any of these unset makes the collector log a startup warning', README.md line 120) repeats the same false assumption.",
+        "suggested_fix": "Fix the comment. Better, reject the placeholders explicitly: in WarnIfUnset or collector.New, treat any value with the prefix 'REPLACE_ME' as a fatal startup error (or at least a loud warning). Or ship the Secret with empty values and document `kubectl create secret` as the supported path."
+      },
+      {
+        "id": "code-2",
+        "category": "security",
+        "severity": "medium",
+        "file": "internal/collector/auth/auth.go",
+        "line": 28,
+        "summary": "Both middlewares fail open when their config is empty (RequireIngestToken when the token is empty, RequireBasicAuth when either user or pass is empty), so a missing or misspelled env var quietly disables the auth the task asked for.",
+        "failure_scenario": "Someone deploys with the Secret key renamed, or sets only UI_AUTH_USERNAME. RequireBasicAuth returns `next` unchanged, and the UI plus ad-hoc SQL (/query/run) are served with no auth. The only signal is a log.Printf at startup. The task was to close the 'no authentication' gap, but out of the box the gap is still there.",
+        "suggested_fix": "Fail closed by default. Refuse to start (return an error from collector.New) when credentials are missing, unless an explicit opt-out such as AUTH_DISABLED=true is set. At minimum, make a half-configured Basic auth (user set, pass empty or the reverse) a startup error instead of silently disabling auth."
+      },
+      {
+        "id": "code-3",
+        "category": "test-coverage",
+        "severity": "medium",
+        "file": "internal/agent/forwarder/forwarder_test.go",
+        "line": 101,
+        "summary": "The test handler writes gotHeader and gotSet on the server goroutine while the test goroutine polls and reads them with no synchronization, which is a data race that `go test -race` will report.",
+        "failure_scenario": "`go test -race ./internal/agent/forwarder` reports DATA RACE on gotSet/gotHeader (lines 101-102 write, lines 120/125/129 read). Without -race, the compiler may legally hoist the load out of the polling loop, which makes the test flaky. The existing TestForwarderRetriesOnCollectorDown in the same file uses an atomic int32 for exactly this reason.",
+        "suggested_fix": "Send the observed header over a buffered channel from the handler, or guard it with a sync.Mutex or atomic.Value, matching the atomic pattern the file already uses."
+      },
+      {
+        "id": "code-4",
+        "category": "test-coverage",
+        "severity": "low",
+        "file": "internal/agent/forwarder/forwarder_test.go",
+        "line": 125,
+        "summary": "The 'no token configured' case sleeps 100ms and then asserts gotSet == false, which also passes when no request ever arrived, so the test cannot tell 'sent without header' apart from 'never sent'.",
+        "failure_scenario": "If the forwarder broke in a way that sent nothing, the no-token subtest would still pass, because gotSet starts false and stays false.",
+        "suggested_fix": "Record that a request was received (a counter or channel) and wait for it in both cases, then check whether the header is present."
+      },
+      {
+        "id": "code-5",
+        "category": "test-coverage",
+        "severity": "medium",
+        "file": "internal/collector/collector.go",
+        "line": 64,
+        "summary": "The security-critical route wiring (which routes get requireUI or requireIngest and which stay exempt) has no test; only the middleware functions are tested on their own.",
+        "failure_scenario": "A future change registers a new UI route with plain route(mux, ...) and no requireUI, or wraps /readyz by accident. The new route ships unauthenticated, or probes start failing, and every test still passes. collector_test.go already exercises this package, so the gap is easy to close.",
+        "suggested_fix": "Add a table-driven test in internal/collector that builds the server with New(cfg) using credentials and a t.TempDir() DB. For each registered pattern (/, /logs, /query/run, /api/v1/facets, POST /api/v1/logs, /healthz, /readyz, /metrics, /static/app.css), assert 401 without credentials, and non-401 for exempt routes and for requests with correct credentials."
+      },
+      {
+        "id": "code-6",
+        "category": "correctness",
+        "severity": "low",
+        "file": "internal/collector/auth/auth.go",
+        "line": 34,
+        "summary": "RequireIngestToken compares the whole 'Bearer <token>' header byte-for-byte, so a client that sends 'bearer <token>' is rejected, although the auth scheme name is case-insensitive per RFC 7235/6750.",
+        "failure_scenario": "A non-agent client (curl script, another service, a proxy that normalises header casing) sends `Authorization: bearer s3cret` and gets 401 even though the token is correct.",
+        "suggested_fix": "Split on the first space, compare the scheme with strings.EqualFold(scheme, \"Bearer\"), then constant-time compare only the token part. The redundant len check before ConstantTimeCompare can also go, since ConstantTimeCompare already returns 0 when lengths differ."
+      },
+      {
+        "id": "code-7",
+        "category": "security",
+        "severity": "low",
+        "file": "internal/collector/auth/auth.go",
+        "line": 56,
+        "summary": "Because `||` short-circuits, the password comparison only runs when the username is correct, so response time reveals whether a guessed username is valid, which undercuts the constant-time intent stated in the doc comment.",
+        "failure_scenario": "An attacker times 401 responses and sees a measurable difference between wrong-username and right-username-wrong-password, which confirms the operator username (a shared single credential).",
+        "suggested_fix": "Evaluate both comparisons without short-circuiting, e.g. `userOK := constantTimeEqual(...); passOK := constantTimeEqual(...); if !ok || (userOK & passOK) == 0`, using the int results of subtle.ConstantTimeCompare."
+      },
+      {
+        "id": "code-8",
+        "category": "correctness",
+        "severity": "low",
+        "file": "deploy/k8s/collector-deployment.yaml",
+        "line": 44,
+        "summary": "The secretKeyRef entries are not marked `optional: true`, so the documented 'leave these unset' mode cannot be reached through the manifests: a missing Secret or key blocks the pod from starting instead of running unauthenticated with a warning.",
+        "failure_scenario": "An operator creates the Secret out-of-band as the comments recommend, but leaves out UI_AUTH_PASSWORD, meaning to disable UI auth as the README describes. The collector pod sticks in CreateContainerConfigError, and so does agent-daemonset.yaml if tracer-agent-auth is missing, which also stops ingest across the cluster.",
+        "suggested_fix": "Either add `optional: true` to the secretKeyRef entries so the documented fallback works, or, preferably given code-2, keep them required and change the README/comments to say the Secret must exist."
+      },
+      {
+        "id": "code-9",
+        "category": "correctness",
+        "severity": "low",
+        "summary": "The local devcluster playground (scripts/devcluster-*.sh) applies deploy/k8s/ wholesale but was not updated, so `devcluster-ui.sh` now opens a browser that hits a Basic-auth prompt with the undocumented REPLACE_ME credentials.",
+        "failure_scenario": "A developer runs the README's 'Quickstart: local playground' flow after this PR and cannot open the UI without first finding the placeholder username and password in collector-secret.yaml. The coder noted this itself as a leftover (trace line 228) but did not fix or document it.",
+        "suggested_fix": "Have devcluster-up.sh create the Secrets with known dev values and print them, or document the playground credentials in the Quickstart section."
+      },
+      {
+        "id": "code-10",
+        "category": "test-coverage",
+        "severity": "low",
+        "file": "internal/collector/auth/auth_test.go",
+        "line": 552,
+        "summary": "TestRequireIngestToken never checks the WWW-Authenticate header on 401 (TestRequireBasicAuth does), and neither table covers 'password set, username empty' or a malformed Basic header.",
+        "failure_scenario": "If the Bearer challenge header were removed or broken, no test would catch it. A regression in the pass-only branch of `user == \"\" || pass == \"\"` would also go unnoticed.",
+        "suggested_fix": "Add the WWW-Authenticate assertion to the ingest table and add rows for {user:\"\", pass:\"x\"} and for an Authorization header of `Basic not-base64`."
+      }
+    ]
+  },
+  "process_review": {
+    "verdict": "acceptable",
+    "summary": "The run took three agents: an `ask` survey, a coder, and a reviewer. It cost $1.49 over 77 LLM turns and 119 tool calls, which is proportionate for a 15-file, +479-line cross-cutting change. The survey was thorough and accurate. It correctly identified the probe, metrics and static exemptions and the agent forwarder as the only ingest client, and it noted that no table-driven tests exist today. The coder then re-read almost every file the survey had already read (about 15 reads). Some of those were required by read-before-edit, but several were for files it never edited. There were zero read-before-edit violations. The trace shows the checks actually ran and passed before finishing: `go test ./...` with ok:true and 13 packages passing (line 162), `make vet; make fmt` with an empty gofmt -l (line 165), and a final combined build/test/vet/fmt run after the YAML and README edits (line 218). Navigation used search, list_files and full read_file calls and never used list_symbols, find_symbol or LSP. All files were under ~320 lines, so that was cheap and acceptable. The judges mostly allowed actions. Five write_gate 'flag' verdicts were not enforced. About 40 judge requests errored, so gating was weaker than intended for part of the run. The reviewer ran a useful mutation spot-check, but it wasted one verify run on a mutation that did not compile. It also approved without catching the incorrect Secret comment, the data race, or the fail-open default. The orchestrator's final summary slightly overstated how much the reviewer independently verified.",
+    "followed_navigation_hierarchy": true,
+    "read_before_edit_violations": 0,
+    "findings": [
+      {
+        "id": "process-1",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 72
+        },
+        "summary": "The coder re-read files the ask survey had already read and summarised, including several it never edited (collector_test.go, ingest/http_test.go, queryapi/http_test.go, agent-configmap.yaml, Makefile).",
+        "evidence": "Lines 68-93 and 157 are coder read_file calls on config.go, collector.go, collector_test.go, agent/config.go, forwarder.go, ingest/http_test.go, queryapi/http_test.go, all four k8s YAMLs and the Makefile. The ask agent had read each of these at lines 8-55 and put their key facts into its handoff (transcript lines 59-104). Edited files had to be re-read under read-before-edit, but the test files, agent-configmap.yaml (line 91) and the Makefile (line 157) were never edited."
+      },
+      {
+        "id": "process-2",
+        "category": "wasted-search",
+        "severity": "low",
+        "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 98
+        },
+        "summary": "The coder ran two speculative README/config-doc searches right after reading the README section that answered the question; the loop_control judge flagged it as repeating itself.",
+        "evidence": "Line 97 read README lines 80-119. Line 98 searched 'HTTP_ADDR|RETENTION_DAYS|CONFIG' in *.md and got no matches. Line 99 searched 'env var|ConfigMap|config\\.go' in README.md and got line 110, already in view. Line 102 then re-read README lines 1-80. The loop_control judge at line 100 scored repeating_itself 0.54. The survey had already reported 'There is no separate \"## Configuration\" section in the README'."
+      },
+      {
+        "id": "process-3",
+        "category": "reasoning-gap",
+        "severity": "low",
+        "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 148
+        },
+        "summary": "The coder asserted 'No existing forwarder tests' and then ran a full-repo list_files to check, when the survey had already mentioned forwarder_test.go and a targeted search or read would have settled it.",
+        "evidence": "Reasoning at line 148: 'No existing forwarder tests to worry about breaking. Let's check if forwarder has a _test.go file already.' followed by an unscoped list_files {}. Line 150 then read internal/agent/forwarder/forwarder_test.go (92 lines), which shows the premise was wrong. The coder recovered."
+      },
+      {
+        "id": "process-4",
+        "category": "wasted-search",
+        "severity": "low",
+        "agent_id": "6a2abdf7973047e2b8576a7fe034fa71",
+        "profile": "ask",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 4
+        },
+        "summary": "The survey's first move was a broad 200-match content search for the literal string 'internal/collector', which list_files (the very next call) answered better.",
+        "evidence": "Line 4: search {\"pattern\": \"internal/collector\", \"max_matches\": 200} returned import lines and README mentions. Line 5: list_files {} gave the actual file layout that the rest of the survey used."
+      },
+      {
+        "id": "process-5",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "38fac7633a02442585b3740ff8a8101a",
+        "profile": "reviewer",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 249
+        },
+        "summary": "The reviewer's first mutation spot-check did not compile, so one full verify run was spent and told it nothing about test coverage.",
+        "evidence": "Line 249 run_verify with mutate_new 'if false {' \u2192 'verdict: FAILED ... auth.go:31:2: declared and not used: want / auth.go:33:3: declared and not used: got'. Line 251 retried with 'if false && (...)', which compiled and correctly failed 4 TestRequireIngestToken subtests."
+      },
+      {
+        "id": "process-6",
+        "category": "reasoning-gap",
+        "severity": "medium",
+        "agent_id": "38fac7633a02442585b3740ff8a8101a",
+        "profile": "reviewer",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 234
+        },
+        "summary": "The reviewer read collector-secret.yaml and forwarder_test changes but approved without noticing that the Secret comment contradicts the code, the race in the new forwarder test, or the missing wiring-level test.",
+        "evidence": "Line 234 read deploy/k8s/collector-secret.yaml, whose comment says applying the file 'as-is with the placeholders left in place ... makes the collector log a startup warning and run that surface unauthenticated'. The auth.go read at line 238 shows the check is only `token == \"\"`. The reviewer's verdict: 'approve \u2014 all hard requirements ... are met'. It described fail-open as 'the intended zero-config default per task', although the task asked to close the auth gap."
+      },
+      {
+        "id": "process-7",
+        "category": "judge-flag",
+        "severity": "low",
+        "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "judge",
+          "line_in_trace_jsonl": 185
+        },
+        "summary": "write_gate raised its hardcoded-secret and scope-creep scores on the first collector-secret.yaml; the coder quietly rewrote the placeholder values without stating a reason, which is sensible, but it kept the misleading comment.",
+        "evidence": "Line 185 write_gate: introduces_hardcoded_secret 0.18, scope_creep score 0.54. The next edit at line 187 replaced 'changeme-ingest-token'/'changeme-admin'/'changeme-password' with 'REPLACE_ME_*' and had an empty reasoning field. Stats show write_gate outcome 'flag' \u00d75 (enforced=false). None of these blocked the run and there was no thrashing."
+      },
+      {
+        "id": "process-8",
+        "category": "judge-flag",
+        "severity": "low",
+        "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "judge",
+          "line_in_trace_jsonl": 103
+        },
+        "summary": "A large share of judge requests errored (engine_judge_requests result=error: call_verify 8, write_gate 8, result_screen 8, loop_control 5, search_rerank 2, exec_approval 1, merge_gate 1), so safety gating was missing for many edits, including the first create_file of auth.go.",
+        "evidence": "Line 103 call_verify and line 104 write_gate both have failed:true with an empty response, right before the line 106 create_file of internal/collector/auth/auth.go. Other failed gates: lines 108, 117, 122, 151/152, 175/176, 181, 188, 194, 202, 211, 216. This is an engine and infrastructure issue, not agent behaviour, but it means the judge record does not cover the whole run."
+      },
+      {
+        "id": "process-9",
+        "category": "missed-tests",
+        "severity": "low",
+        "agent_id": "f93b9aaa8c464630b29b0f0a5f98d5ae",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 162
+        },
+        "summary": "The required checks really ran and passed, but `go test` never ran with -race even though the coder added a goroutine-based test, so the data race in TestForwarderSendsIngestAuthHeader went unnoticed.",
+        "evidence": "Line 162: `go test ./... 2>&1 | tail -80` exit 0, 13 packages ok. Line 165: `make vet; make fmt` exit 0, gofmt -l empty. Line 218: combined build/test/vet/fmt, exit 0 (test results cached). No -race invocation anywhere in the trace."
+      },
+      {
+        "id": "process-10",
+        "category": "reasoning-gap",
+        "severity": "low",
+        "agent_id": "38fac7633a02442585b3740ff8a8101a",
+        "profile": "reviewer",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 251
+        },
+        "summary": "The orchestrator's closing PR text says an independent reviewer verified that build/test/vet/fmt all pass, but the reviewer explicitly said it did not re-run gofmt; the harness verify covers only build+vet+test.",
+        "evidence": "Line 251 harness command: 'go build ./... && go vet ./... && go test ./...'. Reviewer leftover (transcript): 'Did not independently re-run `make fmt`/gofmt -l via run_verify'. Orchestrator final message: '`go build ./...`, `go test ./...`, `make vet`, and `make fmt` all pass cleanly, and an independent reviewer verified this with its own `run_verify`'. The fmt claim is still true, based on the coder's line 165, but its source is misattributed."
+      }
+    ]
+  },
+  "overall_assessment": {
+    "recommendation": "request-changes",
+    "strengths": [
+      "Clear split between two trust domains: a bearer token for service-to-service ingest and Basic auth for UI and queryapi, with the agent forwarder updated to send the token.",
+      "Auth is applied inside the existing route()/instrument() helper, so rejected requests are still counted under the same metric labels, and probes, /metrics and static assets are correctly left open.",
+      "Constant-time comparisons, config via the existing getEnv convention, Secrets injected through secretKeyRef, and README/Service comments updated.",
+      "The middleware unit tests really cover the logic, as the reviewer's mutation spot-check confirmed.",
+      "The trace shows go test, make vet and make fmt actually ran and passed before the run finished (lines 162, 165, 218), and there were zero read-before-edit violations."
+    ],
+    "concerns": [
+      "The shipped Secret comment and README wrongly say that applying the placeholders leaves auth disabled with a warning; in fact it enables auth with credentials that are public in the repo.",
+      "The default is fail-open whenever the env vars are empty or half-set, which leaves the original gap open in misconfigured deployments.",
+      "A data race and a vacuous negative case in the new forwarder test.",
+      "No test covers which routes collector.New protects and which it exempts.",
+      "The reviewer approved without catching any of the above. Judge infrastructure errored on roughly 40 requests, so gating was partial."
+    ],
+    "narrative": "The engine produced a well-scoped, idiomatic change and the process was reasonably disciplined. The survey was accurate, the coder respected read-before-edit, and the required checks demonstrably ran and passed. The cost was proportionate, apart from the coder duplicating the survey's reads. The weaknesses are in judgment more than mechanics. The coder chose a fail-open default and documented the placeholder behaviour backwards. The reviewer checked requirements off a list rather than probing security edge cases, so those mistakes reached the PR. With the documentation and placeholder handling fixed, a fail-closed (or at least validated) default, a race-free forwarder test and a route-wiring test, this would be mergeable."
+  },
+  "links": {
+    "pr_url": "https://github.com/iresharma/tracer/pull/5",
+    "repo_url": "git@github.com:iresharma/tracer.git",
+    "diff_url": "https://github.com/iresharma/tracer/pull/5.diff",
+    "trace_file": "/Users/iresharma/Documents/codeloom/pr_trials/runs/tracer/repo/.engine/trace.jsonl",
+    "session_db": "/Users/iresharma/Documents/codeloom/pr_trials/runs/tracer/repo/.engine/session.db"
+  }
+}

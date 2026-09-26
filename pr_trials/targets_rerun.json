@@ -10,15 +10,6 @@
       "verify_command": "go build ./... && go vet ./..."
     },
     {
-      "name": "codeloom.engine",
-      "repo_url": "git@github.com:iresharma/codeloom.engine.git",
-      "prompt_file": "pr_trials/tasks/codeloom.engine.md",
-      "run_id": "codeloom-engine",
-      "settle": "pr",
-      "max_continues": 3,
-      "verify_command": "pytest -q -n0 -m \"not lsp and not integration and not judge\""
-    },
-    {
       "name": "tracer",
       "repo_url": "git@github.com:iresharma/tracer.git",
       "prompt_file": "pr_trials/tasks/tracer.md",

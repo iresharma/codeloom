@@ -1,0 +1,5234 @@
+{
+  "meta": {
+    "repo": "iresharma/reach-auth-proxy",
+    "pr_url": "https://github.com/iresharma/reach-auth-proxy/pull/16",
+    "pr_number": 16,
+    "task_prompt": "Implement GitHub issue #9 on this repo: \"add redis caching in auth proxy for kanban endpoints.\"\n\nThere is already a shared Redis client at `internal/pkg/redis/main.go`, and it is\nalready used elsewhere in the codebase (see `internal/app/server.go` and\n`internal/pkg/server/permissions/perm.go` for the existing usage pattern). Follow\nthat same pattern rather than inventing a new one.\n\nScope:\n- Add caching for the read paths in `internal/pkg/server/routes/kanban.go`.\n- Add cache invalidation on the corresponding write paths, so a write never\n  leaves a stale cached read behind.\n- Pick sane key naming and TTLs consistent with how the existing Redis usage in\n  this repo does it.\n- This repo currently has no test files. Do not feel obligated to introduce a\n  whole test framework for this change, but do double check the code compiles\n  and, if there's an easy way to sanity-check the caching behavior manually\n  (e.g. a local run), do that.\n\nWhen you are done, close with a single clear paragraph summarizing exactly what\nyou changed and why \u2014 that summary becomes the pull request's title and body\nverbatim, so make it read like a real PR description, not an internal note.\n",
+    "run_id": "reach-auth-proxy",
+    "started_at": 1790384862.0,
+    "finished_at": 1790385742.922912,
+    "engine_commit": "4e204d21101e3098b80fe5623d45947659784b8c",
+    "target_commit_base": "c0d92cbb9f5bfabd2dcab18befa01524800e994b",
+    "target_commit_head": "aa447f8f9588b7b2bee2e29d52dcfae18d3d4c2b",
+    "settle": "pr",
+    "run_status": "ok",
+    "run_detail": ""
+  },
+  "stats": {
+    "session_id": "d1fed91287ae4d5b8b966fa4437c4e40",
+    "cost": 1.9811174,
+    "prompt_tokens": 2532482,
+    "completion_tokens": 78864,
+    "cached_tokens": 2234187,
+    "total_tokens": 2611346,
+    "requests": 98,
+    "turns": 98,
+    "tool_calls": 128,
+    "elapsed_s": 217.8852678340627,
+    "agents": [
+      {
+        "profile": "ask",
+        "agent_id": "61d18a538c49476eb88da49e7a794982",
+        "cost": 0.2636693
+      },
+      {
+        "profile": "coder",
+        "agent_id": "9d58fcf02c5443e884b421876ce5e18e",
+        "cost": 0.2163541
+      },
+      {
+        "profile": "reviewer",
+        "agent_id": "29f407f6ed054d0b9f13eef9e5925a2f",
+        "cost": 0.0
+      },
+      {
+        "profile": "coder",
+        "agent_id": "10d09fde7f02413ca465aee2f65aea03",
+        "cost": 0.3515829999999999
+      },
+      {
+        "profile": "coder",
+        "agent_id": "1259c143fffe42d485497a2fb6d81d76",
+        "cost": 0.3168265
+      },
+      {
+        "profile": "reviewer",
+        "agent_id": "499b166274044c81957a7eb34e09f6d8",
+        "cost": 0.3705111
+      }
+    ],
+    "files_changed": 0,
+    "diffstat": "",
+    "error": "",
+    "prometheus_metrics": {
+      "engine_agent_cost_usd": [
+        {
+          "labels": {
+            "agent_id": "",
+            "profile": "orchestrator"
+          },
+          "value": 0.4621734
+        },
+        {
+          "labels": {
+            "agent_id": "10d09fde7f02413ca465aee2f65aea03",
+            "profile": "coder"
+          },
+          "value": 0.3515829999999999
+        },
+        {
+          "labels": {
+            "agent_id": "1259c143fffe42d485497a2fb6d81d76",
+            "profile": "coder"
+          },
+          "value": 0.3168265
+        },
+        {
+          "labels": {
+            "agent_id": "29f407f6ed054d0b9f13eef9e5925a2f",
+            "profile": "reviewer"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "agent_id": "499b166274044c81957a7eb34e09f6d8",
+            "profile": "reviewer"
+          },
+          "value": 0.3705111
+        },
+        {
+          "labels": {
+            "agent_id": "61d18a538c49476eb88da49e7a794982",
+            "profile": "ask"
+          },
+          "value": 0.2636693
+        },
+        {
+          "labels": {
+            "agent_id": "9d58fcf02c5443e884b421876ce5e18e",
+            "profile": "coder"
+          },
+          "value": 0.2163541
+        }
+      ],
+      "engine_agent_duration_seconds": [
+        {
+          "labels": {
+            "agent_id": "10d09fde7f02413ca465aee2f65aea03",
+            "profile": "coder"
+          },
+          "value": 306.81871083402075
+        },
+        {
+          "labels": {
+            "agent_id": "1259c143fffe42d485497a2fb6d81d76",
+            "profile": "coder"
+          },
+          "value": 132.7273010420031
+        },
+        {
+          "labels": {
+            "agent_id": "29f407f6ed054d0b9f13eef9e5925a2f",
+            "profile": "reviewer"
+          },
+          "value": 1.7439917090232484
+        },
+        {
+          "labels": {
+            "agent_id": "499b166274044c81957a7eb34e09f6d8",
+            "profile": "reviewer"
+          },
+          "value": 240.9455884579802
+        },
+        {
+          "labels": {
+            "agent_id": "61d18a538c49476eb88da49e7a794982",
+            "profile": "ask"
+          },
+          "value": 152.5492368749692
+        },
+        {
+          "labels": {
+            "agent_id": "9d58fcf02c5443e884b421876ce5e18e",
+            "profile": "coder"
+          },
+          "value": 122.85552470799303
+        }
+      ],
+      "engine_agent_finished": [
+        {
+          "labels": {
+            "agent_id": "10d09fde7f02413ca465aee2f65aea03",
+            "profile": "coder",
+            "status": "max_turns"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "1259c143fffe42d485497a2fb6d81d76",
+            "profile": "coder",
+            "status": "ok"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "29f407f6ed054d0b9f13eef9e5925a2f",
+            "profile": "reviewer",
+            "status": "blocked"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "499b166274044c81957a7eb34e09f6d8",
+            "profile": "reviewer",
+            "status": "stopped"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "61d18a538c49476eb88da49e7a794982",
+            "profile": "ask",
+            "status": "ok"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "9d58fcf02c5443e884b421876ce5e18e",
+            "profile": "coder",
+            "status": "ok"
+          },
+          "value": 1
+        }
+      ],
+      "engine_agent_requests": [
+        {
+          "labels": {
+            "agent_id": "",
+            "profile": "orchestrator"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "agent_id": "10d09fde7f02413ca465aee2f65aea03",
+            "profile": "coder"
+          },
+          "value": 21
+        },
+        {
+          "labels": {
+            "agent_id": "1259c143fffe42d485497a2fb6d81d76",
+            "profile": "coder"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "agent_id": "29f407f6ed054d0b9f13eef9e5925a2f",
+            "profile": "reviewer"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "agent_id": "499b166274044c81957a7eb34e09f6d8",
+            "profile": "reviewer"
+          },
+          "value": 19
+        },
+        {
+          "labels": {
+            "agent_id": "61d18a538c49476eb88da49e7a794982",
+            "profile": "ask"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "agent_id": "9d58fcf02c5443e884b421876ce5e18e",
+            "profile": "coder"
+          },
+          "value": 18
+        }
+      ],
+      "engine_agent_spawned": [
+        {
+          "labels": {
+            "agent_id": "10d09fde7f02413ca465aee2f65aea03",
+            "profile": "coder"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "1259c143fffe42d485497a2fb6d81d76",
+            "profile": "coder"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "29f407f6ed054d0b9f13eef9e5925a2f",
+            "profile": "reviewer"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "499b166274044c81957a7eb34e09f6d8",
+            "profile": "reviewer"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "61d18a538c49476eb88da49e7a794982",
+            "profile": "ask"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "9d58fcf02c5443e884b421876ce5e18e",
+            "profile": "coder"
+          },
+          "value": 1
+        }
+      ],
+      "engine_agent_tokens": [
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "cached",
+            "profile": "orchestrator"
+          },
+          "value": 180367
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "completion",
+            "profile": "orchestrator"
+          },
+          "value": 18930
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "prompt",
+            "profile": "orchestrator"
+          },
+          "value": 275092
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "reasoning",
+            "profile": "orchestrator"
+          },
+          "value": 8308
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "total",
+            "profile": "orchestrator"
+          },
+          "value": 294022
+        },
+        {
+          "labels": {
+            "agent_id": "10d09fde7f02413ca465aee2f65aea03",
+            "kind": "cached",
+            "profile": "coder"
+          },
+          "value": 512520
+        },
+        {
+          "labels": {
+            "agent_id": "10d09fde7f02413ca465aee2f65aea03",
+            "kind": "completion",
+            "profile": "coder"
+          },
+          "value": 12979
+        },
+        {
+          "labels": {
+            "agent_id": "10d09fde7f02413ca465aee2f65aea03",
+            "kind": "prompt",
+            "profile": "coder"
+          },
+          "value": 560244
+        },
+        {
+          "labels": {
+            "agent_id": "10d09fde7f02413ca465aee2f65aea03",
+            "kind": "reasoning",
+            "profile": "coder"
+          },
+          "value": 9503
+        },
+        {
+          "labels": {
+            "agent_id": "10d09fde7f02413ca465aee2f65aea03",
+            "kind": "total",
+            "profile": "coder"
+          },
+          "value": 573223
+        },
+        {
+          "labels": {
+            "agent_id": "1259c143fffe42d485497a2fb6d81d76",
+            "kind": "cached",
+            "profile": "coder"
+          },
+          "value": 511675
+        },
+        {
+          "labels": {
+            "agent_id": "1259c143fffe42d485497a2fb6d81d76",
+            "kind": "completion",
+            "profile": "coder"
+          },
+          "value": 10843
+        },
+        {
+          "labels": {
+            "agent_id": "1259c143fffe42d485497a2fb6d81d76",
+            "kind": "prompt",
+            "profile": "coder"
+          },
+          "value": 554106
+        },
+        {
+          "labels": {
+            "agent_id": "1259c143fffe42d485497a2fb6d81d76",
+            "kind": "reasoning",
+            "profile": "coder"
+          },
+          "value": 620
+        },
+        {
+          "labels": {
+            "agent_id": "1259c143fffe42d485497a2fb6d81d76",
+            "kind": "total",
+            "profile": "coder"
+          },
+          "value": 564949
+        },
+        {
+          "labels": {
+            "agent_id": "29f407f6ed054d0b9f13eef9e5925a2f",
+            "kind": "cached",
+            "profile": "reviewer"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "agent_id": "29f407f6ed054d0b9f13eef9e5925a2f",
+            "kind": "completion",
+            "profile": "reviewer"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "agent_id": "29f407f6ed054d0b9f13eef9e5925a2f",
+            "kind": "prompt",
+            "profile": "reviewer"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "agent_id": "29f407f6ed054d0b9f13eef9e5925a2f",
+            "kind": "reasoning",
+            "profile": "reviewer"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "agent_id": "29f407f6ed054d0b9f13eef9e5925a2f",
+            "kind": "total",
+            "profile": "reviewer"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "agent_id": "499b166274044c81957a7eb34e09f6d8",
+            "kind": "cached",
+            "profile": "reviewer"
+          },
+          "value": 523713
+        },
+        {
+          "labels": {
+            "agent_id": "499b166274044c81957a7eb34e09f6d8",
+            "kind": "completion",
+            "profile": "reviewer"
+          },
+          "value": 14813
+        },
+        {
+          "labels": {
+            "agent_id": "499b166274044c81957a7eb34e09f6d8",
+            "kind": "prompt",
+            "profile": "reviewer"
+          },
+          "value": 570776
+        },
+        {
+          "labels": {
+            "agent_id": "499b166274044c81957a7eb34e09f6d8",
+            "kind": "reasoning",
+            "profile": "reviewer"
+          },
+          "value": 12424
+        },
+        {
+          "labels": {
+            "agent_id": "499b166274044c81957a7eb34e09f6d8",
+            "kind": "total",
+            "profile": "reviewer"
+          },
+          "value": 585589
+        },
+        {
+          "labels": {
+            "agent_id": "61d18a538c49476eb88da49e7a794982",
+            "kind": "cached",
+            "profile": "ask"
+          },
+          "value": 158014
+        },
+        {
+          "labels": {
+            "agent_id": "61d18a538c49476eb88da49e7a794982",
+            "kind": "completion",
+            "profile": "ask"
+          },
+          "value": 13851
+        },
+        {
+          "labels": {
+            "agent_id": "61d18a538c49476eb88da49e7a794982",
+            "kind": "prompt",
+            "profile": "ask"
+          },
+          "value": 195441
+        },
+        {
+          "labels": {
+            "agent_id": "61d18a538c49476eb88da49e7a794982",
+            "kind": "reasoning",
+            "profile": "ask"
+          },
+          "value": 619
+        },
+        {
+          "labels": {
+            "agent_id": "61d18a538c49476eb88da49e7a794982",
+            "kind": "total",
+            "profile": "ask"
+          },
+          "value": 209292
+        },
+        {
+          "labels": {
+            "agent_id": "9d58fcf02c5443e884b421876ce5e18e",
+            "kind": "cached",
+            "profile": "coder"
+          },
+          "value": 347898
+        },
+        {
+          "labels": {
+            "agent_id": "9d58fcf02c5443e884b421876ce5e18e",
+            "kind": "completion",
+            "profile": "coder"
+          },
+          "value": 7448
+        },
+        {
+          "labels": {
+            "agent_id": "9d58fcf02c5443e884b421876ce5e18e",
+            "kind": "prompt",
+            "profile": "coder"
+          },
+          "value": 376823
+        },
+        {
+          "labels": {
+            "agent_id": "9d58fcf02c5443e884b421876ce5e18e",
+            "kind": "reasoning",
+            "profile": "coder"
+          },
+          "value": 109
+        },
+        {
+          "labels": {
+            "agent_id": "9d58fcf02c5443e884b421876ce5e18e",
+            "kind": "total",
+            "profile": "coder"
+          },
+          "value": 384271
+        }
+      ],
+      "engine_errors": [
+        {
+          "labels": {
+            "kind": "tool"
+          },
+          "value": 5
+        }
+      ],
+      "engine_judge_cost_usd": 0,
+      "engine_judge_decisions": [
+        {
+          "labels": {
+            "enforced": "false",
+            "outcome": "flag",
+            "tag": "write_gate"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "allow",
+            "tag": "call_verify"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "allow",
+            "tag": "exec_approval"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "edit_multi_file",
+            "tag": "intent_route"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "prompt",
+            "tag": "exec_approval"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "ranked",
+            "tag": "search_rerank"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "stop_early",
+            "tag": "loop_control"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "summary",
+            "tag": "merge_gate"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "suppressed 2/2",
+            "tag": "diagnostics_triage"
+          },
+          "value": 1
+        }
+      ],
+      "engine_judge_info": [
+        {
+          "labels": {
+            "model": "jev-latest"
+          },
+          "value": 1
+        }
+      ],
+      "engine_judge_request_duration_seconds_bucket": [
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.4"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.8"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "1.5"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "3"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "+Inf"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.4"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.8"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "1.5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "3"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "+Inf"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.4"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.8"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "1.5"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "3"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "+Inf"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.4"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.8"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "1.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "3"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.4"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.8"
+          },
+          "value": 26
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "1.5"
+          },
+          "value": 26
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "3"
+          },
+          "value": 26
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "+Inf"
+          },
+          "value": 26
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.4"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.8"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "1.5"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "3"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "+Inf"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.4"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.8"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "1.5"
+          },
+          "value": 43
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "3"
+          },
+          "value": 43
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "+Inf"
+          },
+          "value": 43
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.4"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.8"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "1.5"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "3"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "+Inf"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.4"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.8"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "1.5"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "3"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "+Inf"
+          },
+          "value": 13
+        }
+      ],
+      "engine_judge_request_duration_seconds_sum": [
+        {
+          "labels": {
+            "tag": "call_verify"
+          },
+          "value": 5.268999999999999
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage"
+          },
+          "value": 0.598
+        },
+        {
+          "labels": {
+            "tag": "exec_approval"
+          },
+          "value": 5.415
+        },
+        {
+          "labels": {
+            "tag": "intent_route"
+          },
+          "value": 0.396
+        },
+        {
+          "labels": {
+            "tag": "loop_control"
+          },
+          "value": 10.781
+        },
+        {
+          "labels": {
+            "tag": "merge_gate"
+          },
+          "value": 2.069
+        },
+        {
+          "labels": {
+            "tag": "result_screen"
+          },
+          "value": 18.51
+        },
+        {
+          "labels": {
+            "tag": "search_rerank"
+          },
+          "value": 4.048
+        },
+        {
+          "labels": {
+            "tag": "write_gate"
+          },
+          "value": 4.954
+        }
+      ],
+      "engine_judge_request_duration_seconds_count": [
+        {
+          "labels": {
+            "tag": "call_verify"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "tag": "exec_approval"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "tag": "intent_route"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "loop_control"
+          },
+          "value": 26
+        },
+        {
+          "labels": {
+            "tag": "merge_gate"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "tag": "result_screen"
+          },
+          "value": 43
+        },
+        {
+          "labels": {
+            "tag": "search_rerank"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "tag": "write_gate"
+          },
+          "value": 13
+        }
+      ],
+      "engine_judge_request_duration_seconds_created": [
+        {
+          "labels": {
+            "tag": "call_verify"
+          },
+          "value": 1790385157.626421
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage"
+          },
+          "value": 1790385200.3012428
+        },
+        {
+          "labels": {
+            "tag": "exec_approval"
+          },
+          "value": 1790385216.033091
+        },
+        {
+          "labels": {
+            "tag": "intent_route"
+          },
+          "value": 1790384883.790538
+        },
+        {
+          "labels": {
+            "tag": "loop_control"
+          },
+          "value": 1790384920.765525
+        },
+        {
+          "labels": {
+            "tag": "merge_gate"
+          },
+          "value": 1790385047.1934211
+        },
+        {
+          "labels": {
+            "tag": "result_screen"
+          },
+          "value": 1790384901.971753
+        },
+        {
+          "labels": {
+            "tag": "search_rerank"
+          },
+          "value": 1790384912.477364
+        },
+        {
+          "labels": {
+            "tag": "write_gate"
+          },
+          "value": 1790385158.034848
+        }
+      ],
+      "engine_judge_requests": [
+        {
+          "labels": {
+            "result": "cache",
+            "tag": "result_screen"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "exec_approval"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "loop_control"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "result_screen"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "call_verify"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "diagnostics_triage"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "exec_approval"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "intent_route"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "loop_control"
+          },
+          "value": 26
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "merge_gate"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "result_screen"
+          },
+          "value": 43
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "search_rerank"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "write_gate"
+          },
+          "value": 13
+        }
+      ],
+      "engine_judge_tokens": [
+        {
+          "labels": {
+            "kind": "input"
+          },
+          "value": 271050
+        },
+        {
+          "labels": {
+            "kind": "output"
+          },
+          "value": 12481
+        },
+        {
+          "labels": {
+            "kind": "total"
+          },
+          "value": 283531
+        }
+      ],
+      "engine_llm_request_duration_seconds_bucket": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "5"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "10"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "20"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "30"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "60"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "120"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "300"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "600"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "+Inf"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "5"
+          },
+          "value": 24
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "10"
+          },
+          "value": 41
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "20"
+          },
+          "value": 53
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "30"
+          },
+          "value": 54
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "60"
+          },
+          "value": 55
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "120"
+          },
+          "value": 55
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "300"
+          },
+          "value": 55
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "600"
+          },
+          "value": 55
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "+Inf"
+          },
+          "value": 55
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "5"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "10"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "20"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "30"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "60"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "120"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "300"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "600"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "+Inf"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "10"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "20"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "30"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "60"
+          },
+          "value": 19
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "120"
+          },
+          "value": 19
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "300"
+          },
+          "value": 19
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "600"
+          },
+          "value": 19
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "+Inf"
+          },
+          "value": 19
+        }
+      ],
+      "engine_llm_request_duration_seconds_sum": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask"
+          },
+          "value": 146.78445962403202
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder"
+          },
+          "value": 428.021173258021
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator"
+          },
+          "value": 217.24011370900553
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer"
+          },
+          "value": 230.78160912485328
+        }
+      ],
+      "engine_llm_request_duration_seconds_count": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder"
+          },
+          "value": 55
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer"
+          },
+          "value": 19
+        }
+      ],
+      "engine_llm_request_duration_seconds_created": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask"
+          },
+          "value": 1790384901.561814
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder"
+          },
+          "value": 1790385145.9027982
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator"
+          },
+          "value": 1790384894.647989
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer"
+          },
+          "value": 1790385780.014198
+        }
+      ],
+      "engine_model_cost_usd": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 1.9811174
+        }
+      ],
+      "engine_model_requests": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 98
+        }
+      ],
+      "engine_model_tokens": [
+        {
+          "labels": {
+            "kind": "cached",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 2234187
+        },
+        {
+          "labels": {
+            "kind": "completion",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 78864
+        },
+        {
+          "labels": {
+            "kind": "prompt",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 2532482
+        },
+        {
+          "labels": {
+            "kind": "reasoning",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 31583
+        },
+        {
+          "labels": {
+            "kind": "total",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 2611346
+        }
+      ],
+      "engine_run_agents_live": 0,
+      "engine_run_agents_spawned": 6,
+      "engine_run_cost_usd": 1.9811174,
+      "engine_run_elapsed_seconds": 217.8852678340627,
+      "engine_run_files_edited": 13,
+      "engine_run_files_unique": 5,
+      "engine_run_info": [
+        {
+          "labels": {
+            "session_id": "d1fed91287ae4d5b8b966fa4437c4e40",
+            "workspace": "repo"
+          },
+          "value": 1
+        }
+      ],
+      "engine_run_last_turn_cost_usd": 0.014977,
+      "engine_run_last_turn_tokens": 31893,
+      "engine_run_llm_turns": 98,
+      "engine_run_requests": 98,
+      "engine_run_tokens": [
+        {
+          "labels": {
+            "kind": "cached"
+          },
+          "value": 2234187
+        },
+        {
+          "labels": {
+            "kind": "completion"
+          },
+          "value": 78864
+        },
+        {
+          "labels": {
+            "kind": "prompt"
+          },
+          "value": 2532482
+        },
+        {
+          "labels": {
+            "kind": "reasoning"
+          },
+          "value": 31583
+        },
+        {
+          "labels": {
+            "kind": "total"
+          },
+          "value": 2611346
+        }
+      ],
+      "engine_run_tool_calls": 128,
+      "engine_tool_calls": [
+        {
+          "labels": {
+            "ok": "false",
+            "profile": "ask",
+            "tool": "list_symbols"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "false",
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "ok": "false",
+            "profile": "reviewer",
+            "tool": "search"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "list_files"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "list_symbols"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "apply_patch"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "list_files"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 27
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "orchestrator",
+            "tool": "reviewer"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "find_symbol"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "git_log"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "git_show"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "search"
+          },
+          "value": 9
+        }
+      ],
+      "engine_tool_duration_seconds_bucket": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "2"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "15"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "30"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "60"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "120"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "+Inf"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.5"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "1"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "2"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "5"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "15"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "30"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "60"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "120"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "+Inf"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.01"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.05"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.1"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "1"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "2"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "15"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "30"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "60"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "120"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "+Inf"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.05"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "1"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "2"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "5"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "15"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "30"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "60"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "120"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "+Inf"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch",
+            "le": "0.5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch",
+            "le": "2"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch",
+            "le": "5"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch",
+            "le": "15"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch",
+            "le": "30"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch",
+            "le": "60"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch",
+            "le": "120"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch",
+            "le": "+Inf"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.01"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.05"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.1"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.5"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "1"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "2"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "5"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "15"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "30"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "60"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "120"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "+Inf"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.01"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.05"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.1"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.5"
+          },
+          "value": 25
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "1"
+          },
+          "value": 29
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "2"
+          },
+          "value": 29
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "5"
+          },
+          "value": 29
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "15"
+          },
+          "value": 29
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "30"
+          },
+          "value": 29
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "60"
+          },
+          "value": 29
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "120"
+          },
+          "value": 29
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "+Inf"
+          },
+          "value": 29
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.01"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.05"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.1"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.5"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "1"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "2"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "5"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "15"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "30"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "60"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "120"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "+Inf"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "1"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "2"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "5"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "15"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "30"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "60"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "120"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "+Inf"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.05"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.1"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.5"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "1"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "2"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "5"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "15"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "30"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "60"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "120"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "+Inf"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "2"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "5"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "15"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "30"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "60"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "120"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "+Inf"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "2"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "15"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "30"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "60"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "120"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "+Inf"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "0.01"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "0.05"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "0.1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "0.5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "2"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "15"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "30"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "60"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "120"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "+Inf"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show",
+            "le": "0.5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.01"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.05"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.5"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "1"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "2"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "5"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "15"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "30"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "60"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "120"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "+Inf"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "0.05"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "0.1"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "0.5"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "1"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "2"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "5"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "15"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "30"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "60"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "120"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "+Inf"
+          },
+          "value": 11
+        }
+      ],
+      "engine_tool_duration_seconds_sum": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files"
+          },
+          "value": 0.01
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols"
+          },
+          "value": 0.823
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 3.5129999999999995
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 0.016
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 1.8239999999999996
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch"
+          },
+          "value": 5.929
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 1.26
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files"
+          },
+          "value": 0.005
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 6.874
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 0.014000000000000002
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 101.33
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 0.9870000000000001
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 12.982999999999999
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 0.094
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer"
+          },
+          "value": 0.003
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol"
+          },
+          "value": 0.003
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 0.073
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log"
+          },
+          "value": 0.048
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show"
+          },
+          "value": 1.032
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 0.061
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 2.193
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search"
+          },
+          "value": 1.811
+        }
+      ],
+      "engine_tool_duration_seconds_count": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 29
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search"
+          },
+          "value": 11
+        }
+      ],
+      "engine_tool_duration_seconds_created": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_files"
+          },
+          "value": 1790384928.9891431
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols"
+          },
+          "value": 1790384924.4945269
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 1790384901.973448
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 1790384963.791722
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 1790384912.484189
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "apply_patch"
+          },
+          "value": 1790385674.216304
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 1790385221.632868
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files"
+          },
+          "value": 1790385454.763294
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 1790385145.9062662
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 1790385237.65997
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 1790385218.579875
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 1790385303.3999622
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 1790385158.6111748
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 1790384894.65017
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 1790385142.0403259
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer"
+          },
+          "value": 1790385278.5925262
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "find_symbol"
+          },
+          "value": 1790385862.6818318
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 1790385780.175895
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_log"
+          },
+          "value": 1790385795.563264
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_show"
+          },
+          "value": 1790385805.794431
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 1790385780.102266
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 1790385785.376739
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search"
+          },
+          "value": 1790385796.182434
+        }
+      ],
+      "engine_worktrees_settled": [
+        {
+          "labels": {
+            "action": "pr",
+            "ok": "true",
+            "profile": "coder"
+          },
+          "value": 1
+        }
+      ],
+      "push_failure_time_seconds": 0,
+      "push_time_seconds": 1790386043.1692905
+    }
+  },
+  "verification": {
+    "language": "go",
+    "builds": true,
+    "new_vet_issues": 0,
+    "vet_clean": true,
+    "has_tests": false,
+    "tests_pass": null
+  },
+  "code_review": {
+    "verdict": "needs-changes",
+    "summary": "The caching half of the PR is small and mostly copies the existing GetLabels/getItems pattern: read-through caching on GetLabel, getItem, exportKanban and getKanban, using the same 24h TTL, the X-cache: HIT header and the GetItemFromRedis/AddItemToRedis helpers. There are real problems, though. The three comment handlers now call DeleteAllKeysPrefix on an optional header. If that header is missing, the prefix is empty and the call flushes every key in Redis, including session keys. getItem builds its cache key from the client-supplied X-Board header, so the cached item is not tied to its real board, and a mismatched or missing header leaves stale reads for 24 hours. The getKanban cache wraps database.GetKanban, which always panics as written, so that path can never populate. More than half the diff is a repo-wide change that makes the storage, page and kanban RPC clients return pointers instead of values. It was done only to get a pre-existing `go vet` gate passing, it has nothing to do with issue #9, and it quietly changes error behavior: DeleteItem and DeleteComment now return 200 when the RPC fails. Finally, the PR title and body are the orchestrator's question to the user, not a PR description. No tests were added, and caching behavior was never exercised.",
+    "findings": [
+      {
+        "id": "code-1",
+        "category": "correctness",
+        "severity": "high",
+        "file": "internal/pkg/server/routes/kanban.go",
+        "line": 287,
+        "summary": "AddComment, UpdateComment and DeleteComment now call redis.DeleteAllKeysPrefix(c.Request.Header.Get(\"X-Board\")). These handlers never otherwise need X-Board, so a request without it passes an empty prefix, and SCAN \"*\" deletes every key in Redis.",
+        "failure_scenario": "A client sends POST /kanban/comment?item_id=... with X-Auth and X-Session but no X-Board header. Header.Get returns \"\", so DeleteAllKeysPrefix(\"\") scans the pattern \"*\" and deletes all keys, including every session (authId, sessionId, sessionId:authId). Every user is logged out and every cache is cleared. The same code is at lines 306 and 324.",
+        "suggested_fix": "Guard the invalidation: if boardId == \"\" skip it, or return 400. Better, add a guard inside DeleteAllKeysPrefix that refuses an empty prefix. That also protects the existing createItem/updateItem/DeleteItem callers."
+      },
+      {
+        "id": "code-2",
+        "category": "correctness",
+        "severity": "medium",
+        "file": "internal/pkg/server/routes/kanban.go",
+        "line": 177,
+        "summary": "The getItem cache key is `<X-Board header>:item:<id>`. The board comes from an optional client header, not from the item itself, so the key can drift from the board prefix that the write paths invalidate.",
+        "failure_scenario": "Client A calls GET /kanban/item?id=42 without X-Board, which caches under \":item:42\". Or it sends a different board id than the one used on writes. A later PATCH /kanban/item with X-Board: B1 calls DeleteAllKeysPrefix(\"B1\"), which never matches \":item:42\". The next GET gets the stale item from cache for up to 24h.",
+        "suggested_fix": "Key the item cache on the item id alone (e.g. `item:<id>`) and delete that key explicitly in updateItem, DeleteItem and the three comment handlers, which already have the item or comment id. Otherwise, require X-Board (use Header[\"X-Board\"][0] with a presence check, as the other handlers do) and skip caching when it is absent."
+      },
+      {
+        "id": "code-3",
+        "category": "correctness",
+        "severity": "medium",
+        "file": "internal/pkg/RPC/kanban/main.go",
+        "line": 250,
+        "summary": "Switching `return *res` to `return res` changes failure behavior. Before, a nil gRPC response panicked inside the client, and gin.Recovery turned it into a 500. Now nil flows back to callers that ignore it and report success.",
+        "failure_scenario": "The kanban gRPC service is down during DELETE /kanban/item. The RPC error is only logged, DeleteItem returns a nil *VoidResp, the handler invalidates the cache and returns 200 \"Item deleted\" although nothing was deleted. DeleteComment behaves the same way (returns \"OK\"). In routes/page.go, CreateTemplate's result goes to c.JSON directly, so a failure now returns 200 `null` instead of 500.",
+        "suggested_fix": "Leave the RPC refactor out of this PR (see code-4). If it stays, return (res, err) from the client functions and have handlers answer 5xx on error, instead of relying on a nil-deref panic or silently succeeding."
+      },
+      {
+        "id": "code-4",
+        "category": "simplification",
+        "severity": "medium",
+        "file": "internal/pkg/RPC/page/main.go",
+        "line": 26,
+        "summary": "Most of the diff (+50/-50 across internal/pkg/RPC/{kanban,page,storage}/main.go) is an unrelated signature change of every RPC client function from value to pointer. It was made only to clear pre-existing `go vet` copylocks errors.",
+        "failure_scenario": "Reviewers of a 'redis caching for kanban' PR get exported API changes in the page and storage packages, which nothing in issue #9 touches. That makes the PR harder to review and revert, and it hides the behavior change described in code-3.",
+        "suggested_fix": "Split it out: open a separate PR for the copylocks/pointer-return cleanup, with its own error-handling review. Keep this PR limited to routes/kanban.go and redis/main.go."
+      },
+      {
+        "id": "code-5",
+        "category": "correctness",
+        "severity": "low",
+        "file": "internal/pkg/server/routes/kanban.go",
+        "line": 265,
+        "summary": "The new getKanban cache wraps database.GetKanban. That function does `if err := DB.Raw(...).Scan(&boardId); err != nil { panic(err) }`, and gorm's Scan returns a non-nil *gorm.DB, so it always panics. AddStringToRedis is never reached, and the cache path was never exercised.",
+        "failure_scenario": "GET /kanban always panics inside database.GetKanban, and gin.Recovery returns 500. The new cache is dead code, and nobody noticed because no request was ever run against it. The same function also concatenates the X-Useraccount header into raw SQL (a pre-existing SQL injection).",
+        "suggested_fix": "Fix GetKanban to check `.Error` and use a parameterized query (`DB.Raw(\"select board_id from user_accounts where id = ?\", id)`), or at least note in the PR that this cache path is untested and that GetKanban is broken."
+      },
+      {
+        "id": "code-6",
+        "category": "correctness",
+        "severity": "low",
+        "file": "internal/pkg/server/routes/kanban.go",
+        "line": 306,
+        "summary": "Board-wide invalidation uses a bare prefix with no separator (`<board>*`), so a write to board \"abc\" also clears the cache of any board whose id starts with \"abc\". The PR adds three more call sites of this pattern.",
+        "failure_scenario": "Board ids \"12\" and \"123\": a comment update on board 12 scans \"12*\" and deletes \"123:export\", \"123:item:...\" and so on. That is only needless cache churn, but it also means the prefix scan can match unrelated keys.",
+        "suggested_fix": "Invalidate with `boardId + \":\"` as the prefix (all board-scoped keys already use `<board>:`), and reject an empty boardId."
+      },
+      {
+        "id": "code-7",
+        "category": "test-coverage",
+        "severity": "low",
+        "summary": "No test and no manual run shows that any new cache path returns X-cache: HIT, or that any write actually invalidates. The only verification is that it compiles.",
+        "failure_scenario": "Bugs like code-1, code-2 and code-5 stay hidden because no request was ever made against a Redis-backed instance. The task explicitly asked for a local sanity check if easy.",
+        "suggested_fix": "Add a small miniredis-backed handler test for one read and write pair (e.g. getItem then updateItem), or document a manual curl sequence showing MISS, HIT, then MISS after a write."
+      },
+      {
+        "id": "code-8",
+        "category": "style",
+        "severity": "medium",
+        "summary": "The PR title and body are the orchestrator's interim message to the user. The title is \"The reviewer stopped without completing (returned only a partial...\", and the body asks \"Would you like me to: 1. Try the review again...\". It is not a PR description.",
+        "failure_scenario": "Anyone reading PR #16 sees internal engine chatter and a question addressed to someone else, not a summary of the change. The task required the closing paragraph to 'read like a real PR description'.",
+        "suggested_fix": "Rewrite the title (e.g. \"Add Redis caching and invalidation for kanban read endpoints\") and replace the body with a real summary of the keys, TTL and invalidation points. If the vet refactor stays, list it separately."
+      }
+    ]
+  },
+  "process_review": {
+    "verdict": "inefficient",
+    "summary": "It started well. The ask agent ran a cheap-first survey (read_file, search, list_symbols) and produced a precise briefing, and the first coder (9d58fcf0) made targeted edits, always after reading the file, then ran `go build`. After that the run spent most of its budget working around a pre-existing `go vet` failure the task never asked about. The first coder stated it would 'build/vet' but ran only build, and it dismissed copylocks diagnostics that the diagnostics_triage judge rated high severity. The harness gate then failed and started a fix-up coder (10d09fde). That coder hit max_turns with zero edits: it ran an 87-second `find /` over the whole filesystem, dug through the Go module cache, masked vet's exit code with `| head`, and misread an empty file caused by a wrong redirect order as a clean result. The orchestrator then told the third coder that a 'partial copylocks fix already applied to storage/main.go' existed. It did not; no edits were made. It also turned the fix into a repo-wide RPC refactor, even though it had just told the user the failures were pre-existing and unrelated. The second reviewer repeated the same X-Board search three times, searched a vendor/ directory that does not exist, drew a loop_control repeating_itself score of 0.84, and stopped. The merge_gate record shows review_verdict: request_changes, yet the orchestrator told the user there was 'no verdict'. The run closed on a question to the user, and that question became the PR body. No manual sanity check of the caching was attempted. Six agents, 128 tool calls and about $1.98 for a roughly 50-line caching change is out of proportion. There were no read-before-edit violations.",
+    "followed_navigation_hierarchy": false,
+    "read_before_edit_violations": 0,
+    "findings": [
+      {
+        "id": "process-1",
+        "category": "missed-tests",
+        "severity": "medium",
+        "agent_id": "9d58fcf02c5443e884b421876ce5e18e",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 89,
+          "call_id": "toolu_01WhtGsHAtYyxoaxfrfUcRcN"
+        },
+        "summary": "The coder's stated intent was 'Now build/vet.', but it ran only `go build`. It never ran `go vet`, so it missed the gate the harness enforces.",
+        "evidence": "Line 89: reasoning \"Now build/vet.\" and command \"cd /workspace 2>/dev/null || cd .; go build ./... 2>&1 | head -100\". No go vet call by this agent. The harness verify then failed on `go build ./... && go vet ./...` (transcript, reviewer 29f407f6 blocked)."
+      },
+      {
+        "id": "process-2",
+        "category": "judge-flag",
+        "severity": "low",
+        "agent_id": "9d58fcf02c5443e884b421876ce5e18e",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "judge",
+          "line_in_trace_jsonl": 76
+        },
+        "summary": "The diagnostics_triage judge rated the copylocks diagnostics as caused by this edit and high severity. The coder dismissed them as a pre-existing pattern without checking whether the verify gate would pass.",
+        "evidence": "Line 76 response: \"1:caused_by_this_edit\": 0.84, \"1:severity\": {\"score\": 1.98, \"confidence\": 0.97}. Line 94 reasoning: \"These warnings are pre-existing patterns ... not introduced by new logic issues ... No new errors.\""
+      },
+      {
+        "id": "process-3",
+        "category": "wasted-search",
+        "severity": "high",
+        "agent_id": "10d09fde7f02413ca465aee2f65aea03",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 117
+        },
+        "summary": "The fix-up coder ran a filesystem-wide `find /` (87.1s), then spent several more shell calls in the Go module cache just to confirm that structs.Map accepts pointers. utils.go, already read at line 114, shows the parameter is `x any`, which answers the question.",
+        "evidence": "Line 117: `find / -path /proc -prune -o -type d -name \"structs\" -print 2>/dev/null | grep fatih`, exit 0 (87.1s). Followed by lines 119, 122, 125 and 147 (`sed -n '420,460p' .../structs.go`), plus line 144 read_file outside the workspace, which errored."
+      },
+      {
+        "id": "process-4",
+        "category": "reasoning-gap",
+        "severity": "high",
+        "agent_id": "10d09fde7f02413ca465aee2f65aea03",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 151,
+          "call_id": "toolu_01JJHQ4iAu8hBzshwCadtBWX"
+        },
+        "summary": "The coder misread vet's result twice: `| head` masked the exit code, and `2>&1 > file` sent diagnostics to the terminal instead of the file. It then read the empty file as a clean result, burned turns, and hit max_turns with zero edits.",
+        "evidence": "Line 139: `go vet ./... 2>&1 | head -100` shows exit code 0 with copylocks errors in the output. Line 143: exit code 1. Line 151: `go vet ./... 2>&1 > /tmp/vetout.txt; cat /tmp/vetout.txt`. Line 161: `cat /tmp/vetout.txt`, stdout (empty). This agent made no str_replace or apply_patch calls. Transcript: \"[agent coder 10d09fde finished] status: max_turns\"."
+      },
+      {
+        "id": "process-5",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "10d09fde7f02413ca465aee2f65aea03",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 136,
+          "call_id": "toolu_014mBStRGb1eNJ5zmnv6NgPR"
+        },
+        "summary": "A no-op shell command with no stated reasoning: it cds somewhere, cds back, and runs `true`.",
+        "evidence": "Line 136: `cd /Users/iresharma/go/src 2>/dev/null; cd - 2>/dev/null; true`, reasoning \"\"."
+      },
+      {
+        "id": "process-6",
+        "category": "reasoning-gap",
+        "severity": "medium",
+        "agent_id": "",
+        "profile": "orchestrator",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 167,
+          "call_id": "toolu_018v3GWWgnU7qgSa6TJ49fbD"
+        },
+        "summary": "The orchestrator's follow-up brief says a partial storage fix had already been applied, which is false. The previous coder made no edits, and the orchestrator didn't check the worktree before passing the claim on.",
+        "evidence": "Line 167 task: \"preserving ... (b) your partial copylocks fix already applied to internal/pkg/RPC/storage/main.go ... you already started this, finish/verify\". Trace lines 101-165 (agent 10d09fde) contain no edit tool calls."
+      },
+      {
+        "id": "process-7",
+        "category": "scope-creep",
+        "severity": "medium",
+        "agent_id": "",
+        "profile": "orchestrator",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 167,
+          "call_id": "toolu_018v3GWWgnU7qgSa6TJ49fbD"
+        },
+        "summary": "The orchestrator had just told the user the vet failures were pre-existing and unrelated, then directed a repo-wide refactor of the page, storage and kanban RPC client signatures to clear them, rather than surfacing the conflict.",
+        "evidence": "Transcript, 01:14:49: \"failures are all pre-existing `go vet` 'copylocks' warnings in unrelated files ... This isn't something introduced by the kanban caching diff.\" Line 167 task: \"change each such function's return type from `SomeProtoType` to `*SomeProtoType` ... internal/pkg/RPC/page/main.go ... internal/pkg/RPC/storage/main.go\"."
+      },
+      {
+        "id": "process-8",
+        "category": "redundant-tool-call",
+        "severity": "medium",
+        "agent_id": "499b166274044c81957a7eb34e09f6d8",
+        "profile": "reviewer",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 249
+        },
+        "summary": "The reviewer ran essentially the same X-Board search three times, then twice searched a vendor/ directory that doesn't exist. The loop_control judge scored it as repeating itself.",
+        "evidence": "Line 237 search \"X-Board|X-Useraccount\" in kanban.go, line 247 \"AddComment|UpdateComment|DeleteComment|X-Board\" in internal/pkg/server, line 249 \"X-Board\" repo-wide. Lines 264-265: search path \"vendor/...\" gives \"error: rg failed\". Line 252: repeating_itself 0.74. Line 267: repeating_itself 0.84."
+      },
+      {
+        "id": "process-9",
+        "category": "judge-flag",
+        "severity": "medium",
+        "agent_id": "499b166274044c81957a7eb34e09f6d8",
+        "profile": "reviewer",
+        "trace_ref": {
+          "kind": "judge",
+          "line_in_trace_jsonl": 268
+        },
+        "summary": "The reviewer stopped without running build or vet itself. The merge_gate record shows review_verdict: request_changes, yet the orchestrator told the user there was 'no verdict', and the PR still opened.",
+        "evidence": "Line 268 merge_gate request.result: \"status: stopped ... review_verdict: request_changes\", accomplished_its_brief 0.09. Transcript 01:27:07: \"returned only a partial tool-call trace, no verdict\". Transcript 01:27:13: \"opened pull request ... pull/16\"."
+      },
+      {
+        "id": "process-10",
+        "category": "missed-tests",
+        "severity": "medium",
+        "agent_id": "",
+        "profile": "orchestrator",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 212,
+          "call_id": "toolu_01FiapiWmJANEmtRnxqEtKJF"
+        },
+        "summary": "Compilation was checked: `go build` passed at lines 89 and 209, and `go vet` at line 212, though vet's exit code there came through `| head`. But no agent tried the manual caching sanity check the task asked for, and the run never said why it was skipped.",
+        "evidence": "Line 212: `go vet ./... 2>&1 | head -150`, exit code 0, empty output, which is the last verification run. No run_command anywhere in the trace starts the server, runs redis-cli, or issues curl requests. The task said: \"if there's an easy way to sanity-check the caching behavior manually (e.g. a local run), do that.\""
+      },
+      {
+        "id": "process-11",
+        "category": "reasoning-gap",
+        "severity": "high",
+        "agent_id": "",
+        "profile": "orchestrator",
+        "trace_ref": {
+          "kind": "message",
+          "line_in_trace_jsonl": 268
+        },
+        "summary": "The orchestrator's closing message was a status update plus a question to the user, not the required single-paragraph PR description, and it became the PR title and body verbatim.",
+        "evidence": "Transcript 01:27:07: \"The reviewer stopped without completing ... Would you like me to: 1. Try the review again ... 2. Skip re-review and go straight to `settle_worktree`\". pr.md title: \"[reach-auth-proxy] The reviewer stopped without completing (returned only a partial\"."
+      },
+      {
+        "id": "process-12",
+        "category": "judge-flag",
+        "severity": "low",
+        "agent_id": "1259c143fffe42d485497a2fb6d81d76",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "judge",
+          "line_in_trace_jsonl": 226
+        },
+        "summary": "Several judge calls failed or were truncated (loop_control at 87, 95 and 226; exec_approval at 137; truncated records at 179 and 181). The run carried on without that oversight and nothing reacted to the gaps.",
+        "evidence": "Lines 87, 95, 226: {\"kind\": \"judge\", \"tag\": \"loop_control\", \"failed\": true}. Line 137: exec_approval failed: true. Lines 179 and 181: {\"kind\": \"judge\", \"truncated\": true, \"original_chars\": 17564/17245}."
+      },
+      {
+        "id": "process-13",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "1259c143fffe42d485497a2fb6d81d76",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 206
+        },
+        "summary": "Although it continued from 10d09fde, the third coder re-read almost every file the previous agent had read. That included the first 200 lines of auth.go, when a targeted search at line 207 was enough to show auth.go doesn't call these RPCs.",
+        "evidence": "Lines 169-177 re-read storage/page/kanban main.go; lines 192/194 kanban.go; lines 199/201 page.go; line 204 storage.go; line 206 auth.go lines 1-200; line 207 search in auth.go gives \"(no matches)\"."
+      }
+    ]
+  },
+  "overall_assessment": {
+    "recommendation": "request-changes",
+    "strengths": [
+      "The ask agent's survey was thorough and cheap-first. It correctly found GetLabels/getItems as the real reference pattern and flagged that getKanban returns a raw string.",
+      "The caching edits follow the existing repo idiom: the same helpers, the 24h TTL, the X-cache: HIT header and `<board>:` key naming.",
+      "No read-before-edit violations. Every str_replace and apply_patch came after a read_file of the same path.",
+      "`go build ./...` and `go vet ./...` were verified with real exit codes in the trace (lines 89, 209, 212)."
+    ],
+    "concerns": [
+      "Comment handlers can flush all of Redis, sessions included, when X-Board is absent (code-1).",
+      "The item cache key depends on an optional client header, so writes may not invalidate it (code-2).",
+      "An unrelated repo-wide RPC pointer refactor is bundled in and turns some RPC failures into 200 responses (code-3, code-4).",
+      "The getKanban cache is dead code on top of a GetKanban function that always panics, and no caching behavior was ever exercised (code-5, code-7).",
+      "The PR title and body are an internal question to the user, not a description (code-8, process-11).",
+      "The fix-up coder burned max_turns with zero edits, the orchestrator passed on a false claim that a fix had been applied, and the reviewer stopped with request_changes that was reported as 'no verdict'."
+    ],
+    "narrative": "The core caching change is reasonable in shape, but the invalidation strategy has a dangerous empty-prefix case and a header-dependent key that can go stale, so it isn't safe to merge as is. The process went wrong once the first coder skipped `go vet`. That triggered a harness failure the run handled poorly: an unproductive fix-up agent, a false state claim, and scope creep into unrelated packages. The run then ended with a stopped reviewer and a question to the user posted as the PR body. The feature work needs a focused revision, and the vet cleanup should go into its own PR."
+  },
+  "links": {
+    "pr_url": "https://github.com/iresharma/reach-auth-proxy/pull/16",
+    "repo_url": "git@github.com:iresharma/reach-auth-proxy.git",
+    "diff_url": "https://github.com/iresharma/reach-auth-proxy/pull/16.diff",
+    "trace_file": "/Users/iresharma/Documents/codeloom/pr_trials/runs/reach-auth-proxy/repo/.engine/trace.jsonl",
+    "session_db": "/Users/iresharma/Documents/codeloom/pr_trials/runs/reach-auth-proxy/repo/.engine/session.db"
+  }
+}

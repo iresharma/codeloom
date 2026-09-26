@@ -350,6 +350,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--settle", choices=("keep", "pr", "merge", "discard"), default="pr")
     parser.add_argument("--max-continues", default="1")
+    parser.add_argument("--verify-command", default="")
     parser.add_argument("--pushgateway-url", default="")
     parser.add_argument(
         "--fuse-hours",
@@ -394,6 +395,11 @@ def main() -> int:
     env["ENGINE_TRACE_CALLS"] = "1"
     env["ENGINE_MAX_CONTINUES"] = str(args.max_continues)
     env["ENGINE_JUDGE"] = env.get("ENGINE_JUDGE", "calibrated")
+    # The clone's venv holds the engine's requirements (pytest included); put
+    # it first on PATH so a verify or coder `pytest` resolves to it.
+    env["PATH"] = f"{venv_dir / 'bin'}{os.pathsep}{env.get('PATH', '')}"
+    if args.verify_command:
+        env["ENGINE_VERIFY_CMD"] = args.verify_command
     if args.pushgateway_url:
         env["ENGINE_PUSHGATEWAY_URL"] = args.pushgateway_url
         env["ENGINE_METRICS_JOB"] = "pr-trials"

@@ -1,0 +1,4587 @@
+{
+  "meta": {
+    "repo": "iresharma/tracer",
+    "pr_url": "https://github.com/iresharma/tracer/pull/2",
+    "pr_number": 2,
+    "task_prompt": "This repo's own README, in the \"Status\" section, flags a real gap: \"there's no\nauthentication in front of the UI or API, so don't expose the collector\nService outside the cluster without putting your own auth in front of it.\"\n\nFix that. Add authentication in front of the collector's HTTP surface:\n\n- The JSON/query API under `internal/collector/queryapi` and\n  `internal/collector/ingest`.\n- The server-rendered HTMX/Alpine UI under `internal/collector/ui`.\n\nUse a simple, self-hosted scheme appropriate for a homelab project \u2014 a\ntoken or basic-auth credential supplied via config/env, checked in\nmiddleware \u2014 not an external OAuth provider. Wire it through the same\nconfig mechanism the rest of the collector's settings already use (check how\nexisting ConfigMap-driven settings are read). Make sure the agent-to-collector\ningest path (`POST /api/v1/logs`) still works \u2014 that's service-to-service, not\na browser, so it likely needs its own credential rather than sharing the UI's.\n\nThis repo has real test coverage and a real convention for it. Match that\nconvention:\n\n- Add table-driven `_test.go` files for the new middleware/auth logic, in the\n  same style as the existing tests in `internal/collector/*`.\n- Run `go test ./...`, `make vet`, and `make fmt` before finishing, and make\n  sure all three are clean \u2014 don't declare the task done otherwise.\n- Update `deploy/k8s/*.yaml` and the README/config docs if the new auth\n  setting needs to be provided at deploy time.\n\nWhen you are done, close with a single clear paragraph summarizing exactly\nwhat you changed and why \u2014 that summary becomes the pull request's title and\nbody verbatim, so make it read like a real PR description, not an internal\nnote.\n",
+    "run_id": "tracer",
+    "started_at": 1790384862.0,
+    "finished_at": 1790385490.2590039,
+    "engine_commit": "4e204d21101e3098b80fe5623d45947659784b8c",
+    "target_commit_base": "274b0ed277f93f5a7b78ba3639e8fdadd578810b",
+    "target_commit_head": "14f1498819271e2afd9d9a88f6886695d8aa4687",
+    "settle": "pr",
+    "run_status": "ok",
+    "run_detail": ""
+  },
+  "stats": {
+    "session_id": "bb1d8e041f6c439fa7a39842ea36a098",
+    "cost": 1.3195942999999997,
+    "prompt_tokens": 2152805,
+    "completion_tokens": 42271,
+    "cached_tokens": 1950019,
+    "total_tokens": 2195076,
+    "requests": 85,
+    "turns": 85,
+    "tool_calls": 109,
+    "elapsed_s": 133.06947320810286,
+    "agents": [
+      {
+        "profile": "ask",
+        "agent_id": "3c4eea1f09844737aab0b35bd68de2ac",
+        "cost": 0.0050244
+      },
+      {
+        "profile": "ask",
+        "agent_id": "ca0ddcc753c44c98a4f330cac6b28e6c",
+        "cost": 0.30410919999999997
+      },
+      {
+        "profile": "coder",
+        "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+        "cost": 0.4570021
+      },
+      {
+        "profile": "reviewer",
+        "agent_id": "f8c54e995c864797b14114a771085fcf",
+        "cost": 0.18309419999999998
+      },
+      {
+        "profile": "coder",
+        "agent_id": "4e20d314892748d69a27397eed1883ea",
+        "cost": 0.027297699999999998
+      },
+      {
+        "profile": "coder",
+        "agent_id": "414e564181eb42ab89a4aec4bcd47fd7",
+        "cost": 0.047215299999999995
+      }
+    ],
+    "files_changed": 0,
+    "diffstat": "",
+    "error": "",
+    "prometheus_metrics": {
+      "engine_agent_cost_usd": [
+        {
+          "labels": {
+            "agent_id": "",
+            "profile": "orchestrator"
+          },
+          "value": 0.2958514
+        },
+        {
+          "labels": {
+            "agent_id": "3c4eea1f09844737aab0b35bd68de2ac",
+            "profile": "ask"
+          },
+          "value": 0.0050244
+        },
+        {
+          "labels": {
+            "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+            "profile": "coder"
+          },
+          "value": 0.4570021
+        },
+        {
+          "labels": {
+            "agent_id": "414e564181eb42ab89a4aec4bcd47fd7",
+            "profile": "coder"
+          },
+          "value": 0.047215299999999995
+        },
+        {
+          "labels": {
+            "agent_id": "4e20d314892748d69a27397eed1883ea",
+            "profile": "coder"
+          },
+          "value": 0.027297699999999998
+        },
+        {
+          "labels": {
+            "agent_id": "ca0ddcc753c44c98a4f330cac6b28e6c",
+            "profile": "ask"
+          },
+          "value": 0.30410919999999997
+        },
+        {
+          "labels": {
+            "agent_id": "f8c54e995c864797b14114a771085fcf",
+            "profile": "reviewer"
+          },
+          "value": 0.18309419999999998
+        }
+      ],
+      "engine_agent_duration_seconds": [
+        {
+          "labels": {
+            "agent_id": "3c4eea1f09844737aab0b35bd68de2ac",
+            "profile": "ask"
+          },
+          "value": 8.269727875012904
+        },
+        {
+          "labels": {
+            "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+            "profile": "coder"
+          },
+          "value": 219.31253329198807
+        },
+        {
+          "labels": {
+            "agent_id": "414e564181eb42ab89a4aec4bcd47fd7",
+            "profile": "coder"
+          },
+          "value": 38.80751799995778
+        },
+        {
+          "labels": {
+            "agent_id": "4e20d314892748d69a27397eed1883ea",
+            "profile": "coder"
+          },
+          "value": 24.695146042038687
+        },
+        {
+          "labels": {
+            "agent_id": "ca0ddcc753c44c98a4f330cac6b28e6c",
+            "profile": "ask"
+          },
+          "value": 153.60987054102588
+        },
+        {
+          "labels": {
+            "agent_id": "f8c54e995c864797b14114a771085fcf",
+            "profile": "reviewer"
+          },
+          "value": 103.49252649996197
+        }
+      ],
+      "engine_agent_finished": [
+        {
+          "labels": {
+            "agent_id": "3c4eea1f09844737aab0b35bd68de2ac",
+            "profile": "ask",
+            "status": "ok"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+            "profile": "coder",
+            "status": "ok"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "414e564181eb42ab89a4aec4bcd47fd7",
+            "profile": "coder",
+            "status": "ok"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "4e20d314892748d69a27397eed1883ea",
+            "profile": "coder",
+            "status": "incomplete"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "ca0ddcc753c44c98a4f330cac6b28e6c",
+            "profile": "ask",
+            "status": "ok"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "f8c54e995c864797b14114a771085fcf",
+            "profile": "reviewer",
+            "status": "ok"
+          },
+          "value": 1
+        }
+      ],
+      "engine_agent_requests": [
+        {
+          "labels": {
+            "agent_id": "",
+            "profile": "orchestrator"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "agent_id": "3c4eea1f09844737aab0b35bd68de2ac",
+            "profile": "ask"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+            "profile": "coder"
+          },
+          "value": 32
+        },
+        {
+          "labels": {
+            "agent_id": "414e564181eb42ab89a4aec4bcd47fd7",
+            "profile": "coder"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "agent_id": "4e20d314892748d69a27397eed1883ea",
+            "profile": "coder"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "agent_id": "ca0ddcc753c44c98a4f330cac6b28e6c",
+            "profile": "ask"
+          },
+          "value": 19
+        },
+        {
+          "labels": {
+            "agent_id": "f8c54e995c864797b14114a771085fcf",
+            "profile": "reviewer"
+          },
+          "value": 10
+        }
+      ],
+      "engine_agent_spawned": [
+        {
+          "labels": {
+            "agent_id": "3c4eea1f09844737aab0b35bd68de2ac",
+            "profile": "ask"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+            "profile": "coder"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "414e564181eb42ab89a4aec4bcd47fd7",
+            "profile": "coder"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "4e20d314892748d69a27397eed1883ea",
+            "profile": "coder"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "ca0ddcc753c44c98a4f330cac6b28e6c",
+            "profile": "ask"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "f8c54e995c864797b14114a771085fcf",
+            "profile": "reviewer"
+          },
+          "value": 1
+        }
+      ],
+      "engine_agent_tokens": [
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "cached",
+            "profile": "orchestrator"
+          },
+          "value": 137082
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "completion",
+            "profile": "orchestrator"
+          },
+          "value": 9863
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "prompt",
+            "profile": "orchestrator"
+          },
+          "value": 205009
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "reasoning",
+            "profile": "orchestrator"
+          },
+          "value": 1995
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "total",
+            "profile": "orchestrator"
+          },
+          "value": 214872
+        },
+        {
+          "labels": {
+            "agent_id": "3c4eea1f09844737aab0b35bd68de2ac",
+            "kind": "cached",
+            "profile": "ask"
+          },
+          "value": 4302
+        },
+        {
+          "labels": {
+            "agent_id": "3c4eea1f09844737aab0b35bd68de2ac",
+            "kind": "completion",
+            "profile": "ask"
+          },
+          "value": 397
+        },
+        {
+          "labels": {
+            "agent_id": "3c4eea1f09844737aab0b35bd68de2ac",
+            "kind": "prompt",
+            "profile": "ask"
+          },
+          "value": 4380
+        },
+        {
+          "labels": {
+            "agent_id": "3c4eea1f09844737aab0b35bd68de2ac",
+            "kind": "reasoning",
+            "profile": "ask"
+          },
+          "value": 202
+        },
+        {
+          "labels": {
+            "agent_id": "3c4eea1f09844737aab0b35bd68de2ac",
+            "kind": "total",
+            "profile": "ask"
+          },
+          "value": 4777
+        },
+        {
+          "labels": {
+            "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+            "kind": "cached",
+            "profile": "coder"
+          },
+          "value": 1029583
+        },
+        {
+          "labels": {
+            "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+            "kind": "completion",
+            "profile": "coder"
+          },
+          "value": 13456
+        },
+        {
+          "labels": {
+            "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+            "kind": "prompt",
+            "profile": "coder"
+          },
+          "value": 1076206
+        },
+        {
+          "labels": {
+            "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+            "kind": "reasoning",
+            "profile": "coder"
+          },
+          "value": 1111
+        },
+        {
+          "labels": {
+            "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+            "kind": "total",
+            "profile": "coder"
+          },
+          "value": 1089662
+        },
+        {
+          "labels": {
+            "agent_id": "414e564181eb42ab89a4aec4bcd47fd7",
+            "kind": "cached",
+            "profile": "coder"
+          },
+          "value": 58469
+        },
+        {
+          "labels": {
+            "agent_id": "414e564181eb42ab89a4aec4bcd47fd7",
+            "kind": "completion",
+            "profile": "coder"
+          },
+          "value": 2114
+        },
+        {
+          "labels": {
+            "agent_id": "414e564181eb42ab89a4aec4bcd47fd7",
+            "kind": "prompt",
+            "profile": "coder"
+          },
+          "value": 64224
+        },
+        {
+          "labels": {
+            "agent_id": "414e564181eb42ab89a4aec4bcd47fd7",
+            "kind": "reasoning",
+            "profile": "coder"
+          },
+          "value": 74
+        },
+        {
+          "labels": {
+            "agent_id": "414e564181eb42ab89a4aec4bcd47fd7",
+            "kind": "total",
+            "profile": "coder"
+          },
+          "value": 66338
+        },
+        {
+          "labels": {
+            "agent_id": "4e20d314892748d69a27397eed1883ea",
+            "kind": "cached",
+            "profile": "coder"
+          },
+          "value": 34496
+        },
+        {
+          "labels": {
+            "agent_id": "4e20d314892748d69a27397eed1883ea",
+            "kind": "completion",
+            "profile": "coder"
+          },
+          "value": 1060
+        },
+        {
+          "labels": {
+            "agent_id": "4e20d314892748d69a27397eed1883ea",
+            "kind": "prompt",
+            "profile": "coder"
+          },
+          "value": 38417
+        },
+        {
+          "labels": {
+            "agent_id": "4e20d314892748d69a27397eed1883ea",
+            "kind": "reasoning",
+            "profile": "coder"
+          },
+          "value": 56
+        },
+        {
+          "labels": {
+            "agent_id": "4e20d314892748d69a27397eed1883ea",
+            "kind": "total",
+            "profile": "coder"
+          },
+          "value": 39477
+        },
+        {
+          "labels": {
+            "agent_id": "ca0ddcc753c44c98a4f330cac6b28e6c",
+            "kind": "cached",
+            "profile": "ask"
+          },
+          "value": 462166
+        },
+        {
+          "labels": {
+            "agent_id": "ca0ddcc753c44c98a4f330cac6b28e6c",
+            "kind": "completion",
+            "profile": "ask"
+          },
+          "value": 10036
+        },
+        {
+          "labels": {
+            "agent_id": "ca0ddcc753c44c98a4f330cac6b28e6c",
+            "kind": "prompt",
+            "profile": "ask"
+          },
+          "value": 506700
+        },
+        {
+          "labels": {
+            "agent_id": "ca0ddcc753c44c98a4f330cac6b28e6c",
+            "kind": "reasoning",
+            "profile": "ask"
+          },
+          "value": 208
+        },
+        {
+          "labels": {
+            "agent_id": "ca0ddcc753c44c98a4f330cac6b28e6c",
+            "kind": "total",
+            "profile": "ask"
+          },
+          "value": 516736
+        },
+        {
+          "labels": {
+            "agent_id": "f8c54e995c864797b14114a771085fcf",
+            "kind": "cached",
+            "profile": "reviewer"
+          },
+          "value": 223921
+        },
+        {
+          "labels": {
+            "agent_id": "f8c54e995c864797b14114a771085fcf",
+            "kind": "completion",
+            "profile": "reviewer"
+          },
+          "value": 5345
+        },
+        {
+          "labels": {
+            "agent_id": "f8c54e995c864797b14114a771085fcf",
+            "kind": "prompt",
+            "profile": "reviewer"
+          },
+          "value": 257869
+        },
+        {
+          "labels": {
+            "agent_id": "f8c54e995c864797b14114a771085fcf",
+            "kind": "reasoning",
+            "profile": "reviewer"
+          },
+          "value": 974
+        },
+        {
+          "labels": {
+            "agent_id": "f8c54e995c864797b14114a771085fcf",
+            "kind": "total",
+            "profile": "reviewer"
+          },
+          "value": 263214
+        }
+      ],
+      "engine_judge_cost_usd": 0,
+      "engine_judge_decisions": [
+        {
+          "labels": {
+            "enforced": "false",
+            "outcome": "block",
+            "tag": "write_gate"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "enforced": "false",
+            "outcome": "flag",
+            "tag": "write_gate"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "allow",
+            "tag": "call_verify"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "allow",
+            "tag": "exec_approval"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "edit_multi_file",
+            "tag": "intent_route"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "one_line",
+            "tag": "merge_gate"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "prompt",
+            "tag": "exec_approval"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "ranked",
+            "tag": "search_rerank"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "summary",
+            "tag": "merge_gate"
+          },
+          "value": 4
+        }
+      ],
+      "engine_judge_info": [
+        {
+          "labels": {
+            "model": "jev-latest"
+          },
+          "value": 1
+        }
+      ],
+      "engine_judge_request_duration_seconds_bucket": [
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.4"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "0.8"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "1.5"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "3"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "tag": "call_verify",
+            "le": "+Inf"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.4"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.8"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "1.5"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "3"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "+Inf"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.4"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "0.8"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "1.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "3"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "intent_route",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.4"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.8"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "1.5"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "3"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "+Inf"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.4"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.8"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "1.5"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "3"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "+Inf"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.4"
+          },
+          "value": 19
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.8"
+          },
+          "value": 37
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "1.5"
+          },
+          "value": 38
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "3"
+          },
+          "value": 38
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "+Inf"
+          },
+          "value": 38
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.4"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.8"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "1.5"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "3"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "+Inf"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.4"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "0.8"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "1.5"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "3"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "tag": "write_gate",
+            "le": "+Inf"
+          },
+          "value": 10
+        }
+      ],
+      "engine_judge_request_duration_seconds_sum": [
+        {
+          "labels": {
+            "tag": "call_verify"
+          },
+          "value": 4.712000000000001
+        },
+        {
+          "labels": {
+            "tag": "exec_approval"
+          },
+          "value": 3.487
+        },
+        {
+          "labels": {
+            "tag": "intent_route"
+          },
+          "value": 0.434
+        },
+        {
+          "labels": {
+            "tag": "loop_control"
+          },
+          "value": 8.827000000000002
+        },
+        {
+          "labels": {
+            "tag": "merge_gate"
+          },
+          "value": 3.118
+        },
+        {
+          "labels": {
+            "tag": "result_screen"
+          },
+          "value": 15.328999999999999
+        },
+        {
+          "labels": {
+            "tag": "search_rerank"
+          },
+          "value": 4.894
+        },
+        {
+          "labels": {
+            "tag": "write_gate"
+          },
+          "value": 3.742000000000001
+        }
+      ],
+      "engine_judge_request_duration_seconds_count": [
+        {
+          "labels": {
+            "tag": "call_verify"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "tag": "exec_approval"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "tag": "intent_route"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "loop_control"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "tag": "merge_gate"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "tag": "result_screen"
+          },
+          "value": 38
+        },
+        {
+          "labels": {
+            "tag": "search_rerank"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "tag": "write_gate"
+          },
+          "value": 10
+        }
+      ],
+      "engine_judge_request_duration_seconds_created": [
+        {
+          "labels": {
+            "tag": "call_verify"
+          },
+          "value": 1790385136.8094668
+        },
+        {
+          "labels": {
+            "tag": "exec_approval"
+          },
+          "value": 1790385246.953077
+        },
+        {
+          "labels": {
+            "tag": "intent_route"
+          },
+          "value": 1790384883.729583
+        },
+        {
+          "labels": {
+            "tag": "loop_control"
+          },
+          "value": 1790384909.492137
+        },
+        {
+          "labels": {
+            "tag": "merge_gate"
+          },
+          "value": 1790384908.7817988
+        },
+        {
+          "labels": {
+            "tag": "result_screen"
+          },
+          "value": 1790384908.8447292
+        },
+        {
+          "labels": {
+            "tag": "search_rerank"
+          },
+          "value": 1790384915.2875159
+        },
+        {
+          "labels": {
+            "tag": "write_gate"
+          },
+          "value": 1790385137.2089448
+        }
+      ],
+      "engine_judge_requests": [
+        {
+          "labels": {
+            "result": "cache",
+            "tag": "result_screen"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "exec_approval"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "result_screen"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "search_rerank"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "call_verify"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "exec_approval"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "intent_route"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "loop_control"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "merge_gate"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "result_screen"
+          },
+          "value": 38
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "search_rerank"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "write_gate"
+          },
+          "value": 10
+        }
+      ],
+      "engine_judge_tokens": [
+        {
+          "labels": {
+            "kind": "input"
+          },
+          "value": 243110
+        },
+        {
+          "labels": {
+            "kind": "output"
+          },
+          "value": 14503
+        },
+        {
+          "labels": {
+            "kind": "total"
+          },
+          "value": 257613
+        }
+      ],
+      "engine_llm_request_duration_seconds_bucket": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "5"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "10"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "20"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "30"
+          },
+          "value": 18
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "60"
+          },
+          "value": 20
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "120"
+          },
+          "value": 20
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "300"
+          },
+          "value": 20
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "600"
+          },
+          "value": 20
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "+Inf"
+          },
+          "value": 20
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "5"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "10"
+          },
+          "value": 37
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "20"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "30"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "60"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "120"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "300"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "600"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "+Inf"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "5"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "10"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "20"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "30"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "60"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "120"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "300"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "600"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "+Inf"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "10"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "20"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "30"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "60"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "120"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "300"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "600"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "+Inf"
+          },
+          "value": 10
+        }
+      ],
+      "engine_llm_request_duration_seconds_sum": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask"
+          },
+          "value": 147.068915166019
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder"
+          },
+          "value": 238.06137029081583
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator"
+          },
+          "value": 132.39607641997281
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer"
+          },
+          "value": 84.76551829109667
+        }
+      ],
+      "engine_llm_request_duration_seconds_count": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask"
+          },
+          "value": 20
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer"
+          },
+          "value": 10
+        }
+      ],
+      "engine_llm_request_duration_seconds_created": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask"
+          },
+          "value": 1790384900.197535
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder"
+          },
+          "value": 1790385103.443443
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator"
+          },
+          "value": 1790384896.3225129
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer"
+          },
+          "value": 1790385344.449018
+        }
+      ],
+      "engine_model_cost_usd": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 1.3195942999999997
+        }
+      ],
+      "engine_model_requests": [
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 85
+        }
+      ],
+      "engine_model_tokens": [
+        {
+          "labels": {
+            "kind": "cached",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 1950019
+        },
+        {
+          "labels": {
+            "kind": "completion",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 42271
+        },
+        {
+          "labels": {
+            "kind": "prompt",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 2152805
+        },
+        {
+          "labels": {
+            "kind": "reasoning",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 4620
+        },
+        {
+          "labels": {
+            "kind": "total",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 2195076
+        }
+      ],
+      "engine_run_agents_live": 0,
+      "engine_run_agents_spawned": 6,
+      "engine_run_cost_usd": 1.3195942999999997,
+      "engine_run_elapsed_seconds": 133.06947320810286,
+      "engine_run_files_edited": 10,
+      "engine_run_files_unique": 8,
+      "engine_run_info": [
+        {
+          "labels": {
+            "session_id": "bb1d8e041f6c439fa7a39842ea36a098",
+            "workspace": "repo"
+          },
+          "value": 1
+        }
+      ],
+      "engine_run_last_turn_cost_usd": 0.0080032,
+      "engine_run_last_turn_tokens": 25851,
+      "engine_run_llm_turns": 85,
+      "engine_run_requests": 85,
+      "engine_run_tokens": [
+        {
+          "labels": {
+            "kind": "cached"
+          },
+          "value": 1950019
+        },
+        {
+          "labels": {
+            "kind": "completion"
+          },
+          "value": 42271
+        },
+        {
+          "labels": {
+            "kind": "prompt"
+          },
+          "value": 2152805
+        },
+        {
+          "labels": {
+            "kind": "reasoning"
+          },
+          "value": 4620
+        },
+        {
+          "labels": {
+            "kind": "total"
+          },
+          "value": 2195076
+        }
+      ],
+      "engine_run_tool_calls": 109,
+      "engine_tool_calls": [
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "list_symbols"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "create_file"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "orchestrator",
+            "tool": "reviewer"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "run_verify"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "search"
+          },
+          "value": 3
+        }
+      ],
+      "engine_tool_duration_seconds_bucket": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "0.5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.5"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "1"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "2"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "5"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "15"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "30"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "60"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "120"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "+Inf"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.01"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.05"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.1"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.5"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "1"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "2"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "5"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "15"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "30"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "60"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "120"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "+Inf"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.05"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.1"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.5"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "1"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "2"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "5"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "15"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "30"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "60"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "120"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "+Inf"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "0.5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "2"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "5"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "15"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "30"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "60"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "120"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "+Inf"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.01"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.05"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.1"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.5"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "1"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "2"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "5"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "15"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "30"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "60"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "120"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "+Inf"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.01"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.05"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.1"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.5"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "1"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "2"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "5"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "15"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "30"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "60"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "120"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "+Inf"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.01"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.05"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.1"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.5"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "1"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "2"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "5"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "15"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "30"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "60"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "120"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "+Inf"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "1"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "2"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "5"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "15"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "30"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "60"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "120"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "+Inf"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.05"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.1"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "1"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "2"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "15"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "30"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "60"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "120"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "+Inf"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "2"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "5"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "15"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "30"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "60"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "120"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "+Inf"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.01"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.05"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "2"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "15"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "30"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "60"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "120"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "+Inf"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "2"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "15"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "30"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "60"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "120"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "+Inf"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "2"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "15"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "30"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "60"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "120"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "+Inf"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.5"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "1"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "2"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "5"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "15"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "30"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "60"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "120"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "+Inf"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "0.5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "0.05"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "0.1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "0.5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "1"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "2"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "5"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "15"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "30"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "60"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "120"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search",
+            "le": "+Inf"
+          },
+          "value": 3
+        }
+      ],
+      "engine_tool_duration_seconds_sum": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols"
+          },
+          "value": 1.231
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 6.740000000000001
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 0.023
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 7.262999999999998
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file"
+          },
+          "value": 4.527
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 0.151
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 1.9409999999999998
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 0.046
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 19.733999999999998
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 0.097
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 9.605
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 0.11
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 0.2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 0.057
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 3.5919999999999996
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify"
+          },
+          "value": 10.429
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search"
+          },
+          "value": 0.6910000000000001
+        }
+      ],
+      "engine_tool_duration_seconds_count": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 13
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search"
+          },
+          "value": 3
+        }
+      ],
+      "engine_tool_duration_seconds_created": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols"
+          },
+          "value": 1790384914.986773
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 1790384908.8449972
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 1790385011.77441
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 1790384900.243582
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file"
+          },
+          "value": 1790385147.32767
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 1790385276.589134
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 1790385103.4458292
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 1790385287.978661
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 1790385244.2756789
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 1790385115.427495
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 1790385137.802597
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 1790384896.324626
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 1790385099.98212
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "reviewer"
+          },
+          "value": 1790385336.535957
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 1790385344.590774
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 1790385344.514861
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 1790385348.9641778
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "run_verify"
+          },
+          "value": 1790385382.329333
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "search"
+          },
+          "value": 1790385358.468357
+        }
+      ],
+      "engine_worktrees_settled": [
+        {
+          "labels": {
+            "action": "pr",
+            "ok": "true",
+            "profile": "coder"
+          },
+          "value": 1
+        }
+      ],
+      "push_failure_time_seconds": 0,
+      "push_time_seconds": 1790385534.5135994
+    }
+  },
+  "verification": {
+    "language": "go",
+    "builds": true,
+    "new_vet_issues": 0,
+    "vet_clean": true,
+    "has_tests": true,
+    "tests_pass": true
+  },
+  "code_review": {
+    "verdict": "needs-changes",
+    "summary": "The middleware is small and mostly correct: constant-time comparison on both basic-auth fields and the bearer token, probes and /metrics left open, auth wrapped inside instrument() so 401s still reach the HTTP metrics, and table-driven tests for both middlewares. The PR still fails the task's one explicit functional requirement, that the agent-to-collector ingest path keeps working. The collector now demands `Authorization: Bearer <INGEST_AUTH_TOKEN>` on POST /api/v1/logs, but nothing on the agent side (internal/agent/forwarder, agent config, deploy/k8s/agent-configmap.yaml / agent-daemonset.yaml) was changed to send that header. So once an operator follows the new README and applies collector-secret.yaml, every agent batch gets a 401 and ingestion stops. The Deployment also references the Secret through non-optional secretKeyRefs, so the collector pod will not start at all if the Secret is missing. That contradicts the README's and config comment's claim that leaving it unset is a backward-compatible default. Smaller problems: no route-level test proves which endpoints are actually wrapped, partial basic-auth config is handled silently, and the same (cfg.BasicAuthUser, cfg.BasicAuthPass) argument pair is repeated on 11 lines. The PR title and body are also orchestrator chatter, not a PR description.",
+    "findings": [
+      {
+        "id": "code-1",
+        "category": "correctness",
+        "severity": "high",
+        "file": "internal/collector/collector.go",
+        "line": 51,
+        "summary": "Ingest is now gated by a bearer token, but the agent that posts to /api/v1/logs was never updated to send one, so enabling ingest auth breaks log ingestion.",
+        "failure_scenario": "Operator follows the new README (line 111: 'fill in real credentials in deploy/k8s/collector-secret.yaml ... before applying it') and sets INGEST_AUTH_TOKEN. The collector then rejects every agent POST /api/v1/logs with 401, because internal/agent/forwarder sends no Authorization header and the agent has no INGEST_AUTH_TOKEN setting (agent-configmap.yaml only has COLLECTOR_URL). No logs are stored. Unit tests stay green because they only exercise the middleware against a hand-built request.",
+        "suggested_fix": "Add an ingest-token setting to the agent config (e.g. getEnv(\"INGEST_AUTH_TOKEN\", \"\") in internal/agent/config). Have the forwarder set `Authorization: Bearer <token>` on each POST when it is non-empty, with a test in internal/agent/forwarder that asserts the header. Wire the same Secret key into deploy/k8s/agent-daemonset.yaml via secretKeyRef, and update the README accordingly."
+      },
+      {
+        "id": "code-2",
+        "category": "correctness",
+        "severity": "medium",
+        "file": "deploy/k8s/collector-deployment.yaml",
+        "line": 42,
+        "summary": "The three secretKeyRef env entries are not `optional: true`, so the collector pod fails to start when the tracer-collector-auth Secret is missing, contrary to the documented 'empty means disabled, backward-compatible' default.",
+        "failure_scenario": "An existing deployment re-applies the updated collector-deployment.yaml without creating the Secret (the README calls the Secret a template not to commit with real values, so many operators will skip or delay it). Kubernetes reports CreateContainerConfigError: secret \"tracer-collector-auth\" not found, and the collector never starts. Meanwhile the README and the config.go comment promise that deploys without the Secret 'don't break at startup'.",
+        "suggested_fix": "Add `optional: true` under each secretKeyRef, so a missing Secret yields empty env vars and auth is disabled as documented. Alternatively, keep it required and change the README and config comments to say the Secret is mandatory."
+      },
+      {
+        "id": "code-3",
+        "category": "correctness",
+        "severity": "low",
+        "file": "internal/collector/auth.go",
+        "line": 14,
+        "summary": "Basic auth is disabled only when both user and pass are empty; a half-configured credential is enforced silently, with an empty value as the expected secret.",
+        "failure_scenario": "AUTH_USERNAME=admin with AUTH_PASSWORD unset (e.g. a typo in the Secret key) turns on auth that accepts `admin:` with an empty password. This is a weak credential the operator never intended, and nothing is logged.",
+        "suggested_fix": "In config.Load or collector.New, treat 'exactly one of AUTH_USERNAME/AUTH_PASSWORD set' as a configuration error (fail startup or log.Fatal). Or at least log a warning, and add a table case covering it."
+      },
+      {
+        "id": "code-4",
+        "category": "test-coverage",
+        "severity": "medium",
+        "file": "internal/collector/auth_test.go",
+        "line": 90,
+        "summary": "Tests cover only the two middleware functions in isolation; nothing checks that collector.New actually wraps the right routes and leaves /healthz, /readyz and /metrics open.",
+        "failure_scenario": "A future route added with a bare route(mux, ...) call, or a refactor that drops the wrapper from /static/ or /api/v1/facets, would ship unauthenticated with every test green. Likewise, someone accidentally wrapping /healthz would break k8s probes without failing a test.",
+        "suggested_fix": "Add a table-driven test that builds the mux (or factors route registration into a testable function) with non-empty creds. Assert 401 for each protected pattern without credentials, 200/202 with the right credential, and 200 on /healthz, /readyz and /metrics with none."
+      },
+      {
+        "id": "code-5",
+        "category": "correctness",
+        "severity": "low",
+        "file": "internal/collector/auth.go",
+        "line": 40,
+        "summary": "The bearer scheme is matched case-sensitively with CutPrefix(\"Bearer \"), although RFC 7235 auth schemes are case-insensitive.",
+        "failure_scenario": "A client or proxy that sends `Authorization: bearer <token>` or `BEARER <token>` is rejected with 401 even though the token is correct.",
+        "suggested_fix": "Split on the first space and compare the scheme with strings.EqualFold(scheme, \"Bearer\"). Add a table case for a lower-case scheme and one for a wrong scheme (e.g. `Basic ...`)."
+      },
+      {
+        "id": "code-6",
+        "category": "simplification",
+        "severity": "low",
+        "file": "internal/collector/collector.go",
+        "line": 52,
+        "summary": "`basicAuthMiddleware(..., cfg.BasicAuthUser, cfg.BasicAuthPass)` is repeated on 11 route lines, which makes the route table hard to scan and easy to get wrong for new routes.",
+        "failure_scenario": "Maintenance hazard: each new UI/API route must repeat the full wrapper and both config fields. Forgetting it silently exposes the route (see code-4).",
+        "suggested_fix": "Define a local `protect := func(h http.Handler) http.Handler { return basicAuthMiddleware(h, cfg.BasicAuthUser, cfg.BasicAuthPass) }`, or give route() a variant that applies it, so each registration reads `route(mux, \"GET /logs\", protect(http.HandlerFunc(uiHandlers.LogsPage)))`."
+      },
+      {
+        "id": "code-7",
+        "category": "style",
+        "severity": "low",
+        "file": "internal/collector/config/config.go",
+        "line": 40,
+        "summary": "The new env var names don't follow the file's existing convention that env keys mirror the struct field names.",
+        "failure_scenario": "Existing fields map predictably (HTTPAddr\u2192HTTP_ADDR, DBPath\u2192DB_PATH, IngestChanCap\u2192INGEST_CHAN_CAPACITY). The new BasicAuthUser/BasicAuthPass read AUTH_USERNAME/AUTH_PASSWORD, which makes grepping from field to env var less obvious. Minor inconsistency.",
+        "suggested_fix": "Either rename the fields (AuthUsername/AuthPassword) or the env vars (BASIC_AUTH_USER/BASIC_AUTH_PASS) so they line up like the other settings."
+      },
+      {
+        "id": "code-8",
+        "category": "style",
+        "severity": "medium",
+        "summary": "The PR title and body are orchestrator chatter, not the single PR-description paragraph the task asked for.",
+        "failure_scenario": "The PR title is 'Everything is complete and verified clean: `go build/vet/test/fmt` all'. The body includes a worktree path, a quoted 'PR-ready summary' block, and 'Would you like me to merge this into your current branch, open a PR, or just keep the worktree for now?'. A reviewer or changelog reader gets internal status text instead of a description.",
+        "suggested_fix": "Retitle to 'Add authentication in front of the collector's UI and API' and replace the body with only the quoted summary paragraph."
+      }
+    ]
+  },
+  "process_review": {
+    "verdict": "acceptable",
+    "summary": "The run followed a sensible shape: an ask-profile survey, one coder with a detailed brief, a reviewer, then a nit fix-up. It stayed within budget (~$1.32, 85 LLM turns, 109 tool calls, ~10.5 min wall) for an 8-file, ~270-line change. Read-before-edit was respected throughout: every str_replace was preceded by a read_file of the same path in the same agent, and create_file was used only for new files. The task's verification demands are backed by the trace, not just the summary. `make fmt` (line 145) exposed an unformatted config.go that the coder fixed (line 151); `make vet` passed (line 153); `go test ./...` passed with 12 packages ok and 0 failed (line 157); `make fmt` was clean afterwards (line 164). The reviewer also ran a mutation spot-check that went red (line 193). The big miss is a reasoning gap that three agents share. The survey saw internal/agent hits (line 58) and COLLECTOR_URL in agent-configmap.yaml (line 44) but dismissed the agent as unrelated. The brief never asked the coder to update the agent client. The reviewer marked 'ingest path still works' as met on unit-test evidence alone. The shipped change therefore breaks ingestion once the token is set. Navigation was also wasteful. The survey used `search` with pattern '.' as a directory lister (263 KB and 131 KB result payloads truncated by the judge), plus two meaningless '\\.go:' searches. list_files, find_symbol and the LSP tools were never used. The orchestrator also made a stray 'placeholder' spawn and spent a second coder agent re-verifying a three-line YAML placeholder change. The final message, which became the PR title and body, ignored the task's formatting instruction.",
+    "followed_navigation_hierarchy": false,
+    "read_before_edit_violations": 0,
+    "findings": [
+      {
+        "id": "process-1",
+        "category": "reasoning-gap",
+        "severity": "high",
+        "agent_id": "ca0ddcc753c44c98a4f330cac6b28e6c",
+        "profile": "ask",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 60
+        },
+        "summary": "The survey found the agent side of the ingest path and wrote it off as unrelated, so nobody updated the agent to send the new ingest token.",
+        "evidence": "Line 58's search for 'Authorization|Bearer|API_KEY|Token' returned only internal/agent/podwatcher hits. The reasoning at line 60 says: 'Confirmed no auth mechanism exists in the collector today (that's about the agent's k8s API client, unrelated).' Line 44's search output already showed deploy/k8s/agent-configmap.yaml:7 COLLECTOR_URL, and internal/agent/forwarder appears in the test output (line 157). No agent ever read internal/agent/forwarder or agent-daemonset.yaml, even though the task says 'Make sure the agent-to-collector ingest path (POST /api/v1/logs) still works'."
+      },
+      {
+        "id": "process-2",
+        "category": "reasoning-gap",
+        "severity": "high",
+        "agent_id": "f8c54e995c864797b14114a771085fcf",
+        "profile": "reviewer",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 175
+        },
+        "summary": "The reviewer approved 'ingest path must still work' as met without checking that any client sends the new bearer token.",
+        "evidence": "The git_diff at line 175 touches no internal/agent file. The reviewer's requirements table still says: 'Ingest path (POST /api/v1/logs) must still work ... | met | collector.go:51 uses bearerAuthMiddleware ... auth_test.go:90-142 exercises bearer path incl. correct-token 200'. That evidence is a synthetic request, not the real agent client."
+      },
+      {
+        "id": "process-3",
+        "category": "wasted-search",
+        "severity": "medium",
+        "agent_id": "ca0ddcc753c44c98a4f330cac6b28e6c",
+        "profile": "ask",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 6
+        },
+        "summary": "The survey used `search` with pattern '.' as a file lister and content dump on whole directories, when list_files or list_symbols would have answered the question cheaply.",
+        "evidence": "Line 6: search {pattern: '.', path: 'internal/collector', max_matches: 200}. The follow-up judge record at line 5 is marked truncated with original_chars 263484. The same pattern repeats at line 14 (config), 21 (ingest), 30 (queryapi), 32 (ui; judge line 31 original_chars 131909) and 44 (deploy/k8s). The ask agent then read most of those files in full anyway (lines 10, 16, 24, 35, 40, 42, 50, 52). It used list_symbols once (line 12) and never used list_files, find_symbol or LSP tools. This agent cost $0.30 over 19 requests."
+      },
+      {
+        "id": "process-4",
+        "category": "wasted-search",
+        "severity": "low",
+        "agent_id": "ca0ddcc753c44c98a4f330cac6b28e6c",
+        "profile": "ask",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 33
+        },
+        "summary": "Two searches used a pattern that cannot match anything useful.",
+        "evidence": "Line 33 is search {pattern: '\\\\.go:', path: 'internal/collector/ui'} \u2192 '(no matches)'. Line 60 is search {pattern: '\\\\.go:', path: 'deploy/k8s', max_matches: 5} \u2192 '(no matches)'. The pattern looks for the literal 'file.go:' prefix of search output, not file content."
+      },
+      {
+        "id": "process-5",
+        "category": "reasoning-gap",
+        "severity": "low",
+        "agent_id": "",
+        "profile": "orchestrator",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 4
+        },
+        "summary": "The orchestrator spawned a stray ask agent with task 'placeholder', and the call's reasoning describes a different action.",
+        "evidence": "Line 4 is ask {task: 'placeholder'} \u2192 agent 3c4eea1f. Its reasoning field repeats the real survey's rationale ('Started the survey (ask, agent_id=ca0ddcc7...) to map out the config mechanism...'). The transcript then says 'I made an erroneous extra spawn just now (a placeholder task) \u2014 ignoring that'. Cost was small ($0.005), but it's an unexplained, unintended action."
+      },
+      {
+        "id": "process-6",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 114
+        },
+        "summary": "The coder re-read all of collector.go right after its own successful edit, having already read it at line 77, and used search plus read_file where find_symbol or hover would have answered a type question.",
+        "evidence": "Line 108's str_replace on collector.go returned the full diff. Line 109 searched 'func NewHandler' and line 111 read ingest/http.go lines 1-40 to confirm *ingest.Handler implements http.Handler. Line 114 then read collector.go in full (166 lines), with reasoning 'Let's view the whole file now.' The brief also said 'trust these, no need to re-discover', yet lines 79, 81 and 82 re-read collector_test.go, ingest/http_test.go and collector-configmap.yaml, none of which it edited."
+      },
+      {
+        "id": "process-7",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 142
+        },
+        "summary": "The coder ran a pointless workspace probe, and its reasoning doesn't match the command.",
+        "evidence": "Line 142 is run_command 'cd /workspace 2>/dev/null || true; pwd; ls' (its exec_approval judge at line 141 has failed: true). The reasoning reads 'That's just documentation guidance, not real secrets. Now run gofmt, vet, tests.', but the command runs none of those."
+      },
+      {
+        "id": "process-8",
+        "category": "judge-flag",
+        "severity": "low",
+        "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "judge",
+          "line_in_trace_jsonl": 116
+        },
+        "summary": "The write_gate judge scored introduces_hardcoded_secret high on the auth_test.go creation; the flag was unenforced and the coder continued, which is reasonable for test fixtures.",
+        "evidence": "Line 116 write_gate response: introduces_hardcoded_secret 0.81 for create_file internal/collector/auth_test.go (fixtures 'admin'/'secret'/'s3cr3t'). stats.json records write_gate block=1 and flag=2, all enforced=false. The trace records don't carry an explicit outcome field, so I can't say which of lines 96\u2013138 map to block vs flag. The next reasoning (line 142) dismisses it: 'just documentation guidance, not real secrets'. No thrash followed."
+      },
+      {
+        "id": "process-9",
+        "category": "judge-flag",
+        "severity": "low",
+        "agent_id": "3e5572f81c334aea9c6db55b0e6d5852",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "judge",
+          "line_in_trace_jsonl": 138
+        },
+        "summary": "write_gate scored the README Deploying-section edit as low intent-match with raised scope_creep; the flag was unenforced, the edit was in scope, and the run didn't react.",
+        "evidence": "Line 138: matches_stated_intent 0.17, scope_creep score 0.35 (confidence 0.47) for the str_replace on README.md at line 140. The task explicitly asks to 'Update ... the README/config docs', so ignoring the flag was correct."
+      },
+      {
+        "id": "process-10",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "414e564181eb42ab89a4aec4bcd47fd7",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 214
+        },
+        "summary": "After the fix-up coder finished 'incomplete', the orchestrator spawned a whole second coder only to re-verify a three-line placeholder edit that had already landed and been engine-verified.",
+        "evidence": "Line 209 (agent 4e20d314) already replaced the three CHANGE_ME values, and the engine reported 'nit fix-up verified (go build ./... && go vet ./... && go test ./...)'. Line 214 spawns 414e5641 anyway. That agent found 'No edit needed since the file was already fixed', re-ran build/vet/test/fmt (lines 219, 224, 227; tests were all cached), and retried the pyyaml check at line 222, even though line 164 had already shown 'ModuleNotFoundError: No module named yaml'. Cost: two extra agents (~$0.075) for a cosmetic nit."
+      },
+      {
+        "id": "process-11",
+        "category": "reasoning-gap",
+        "severity": "medium",
+        "agent_id": "",
+        "profile": "orchestrator",
+        "summary": "The orchestrator's closing message, which becomes the PR title and body verbatim, ignores the task's instruction to close with a single clear PR-description paragraph.",
+        "evidence": "The final assistant message in transcript.md (01:18:43) opens 'Everything is complete and verified clean...'. It includes the worktree path and a quoted 'PR-ready summary' block, and ends 'Would you like me to merge this ..., open a PR, or just keep the worktree for now?'. pr.md shows the title became '[tracer] Everything is complete and verified clean: `go build/vet/test/fmt` all'. The reviewer explicitly skipped this requirement ('Closing summary ... | conditional | skipped')."
+      }
+    ]
+  },
+  "overall_assessment": {
+    "recommendation": "request-changes",
+    "strengths": [
+      "Middleware is small, idiomatic stdlib Go: constant-time comparison on every credential field, and a correct WWW-Authenticate header for browser basic auth.",
+      "Health, readiness and metrics endpoints were deliberately left unauthenticated, and the auth wrapper sits inside instrument(), so 401s still show up in the HTTP metrics.",
+      "Credentials go through the existing getEnv config loader and a new Secret, not the plaintext ConfigMap.",
+      "Verification is real and visible in the trace: make fmt caught and fixed a gofmt issue, make vet and go test ./... passed (12 packages ok), and the reviewer ran a mutation spot-check proving the new tests fail when the logic is removed.",
+      "Zero read-before-edit violations; unenforced judge flags were handled calmly, with no thrashing."
+    ],
+    "concerns": [
+      "The agent's forwarder was never updated to send the new bearer token, so enabling INGEST_AUTH_TOKEN (as the README instructs) breaks all log ingestion. This violates the task's explicit 'ingest path still works' requirement.",
+      "Non-optional secretKeyRefs mean the collector pod won't start without the Secret, contradicting the documented backward-compatible default.",
+      "No route-level test guards which endpoints are protected.",
+      "The PR title and body are internal orchestrator chatter, not a PR description.",
+      "Survey navigation dumped whole directories through search '.', bloating context and cost. list_files, find_symbol and LSP tools were never used."
+    ],
+    "narrative": "The engine did careful, well-verified work on the part of the problem it looked at, and it proved the tests and linters were clean instead of just claiming so. But its investigation stopped at the collector's own package boundary. The survey dismissed the agent-side HTTP client as unrelated, the coder's brief never mentioned it, and the reviewer accepted a unit test as proof that ingest still works. The result is a PR that passes CI but breaks the product's core data path as soon as an operator turns the feature on as documented. It also bricks the collector Deployment if the Secret is missing. Both are fixable in a small follow-up: an agent-side token plus the forwarder header, and `optional: true` on the secretKeyRefs. Until then this should not merge."
+  },
+  "links": {
+    "pr_url": "https://github.com/iresharma/tracer/pull/2",
+    "repo_url": "git@github.com:iresharma/tracer.git",
+    "diff_url": "https://github.com/iresharma/tracer/pull/2.diff",
+    "trace_file": "/Users/iresharma/Documents/codeloom/pr_trials/runs/tracer/repo/.engine/trace.jsonl",
+    "session_db": "/Users/iresharma/Documents/codeloom/pr_trials/runs/tracer/repo/.engine/session.db"
+  }
+}

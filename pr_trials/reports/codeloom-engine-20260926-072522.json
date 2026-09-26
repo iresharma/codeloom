@@ -1,0 +1,458 @@
+{
+  "meta": {
+    "repo": "iresharma/codeloom.engine",
+    "pr_url": "https://github.com/iresharma/codeloom.engine/pull/42",
+    "pr_number": 42,
+    "task_prompt": "This repo is the engine you are currently running as \u2014 you are being asked to\nimprove your own codebase. This is a two-part task; land it as a single PR.\n\n## Part A \u2014 robust HTTP/HTTPS error handling\n\nFind the `http_request` tool (under `tools/`). Harden it against real-world\nfailure modes that a naive implementation misses:\n\n- Connection timeouts and read timeouts, with sane, configurable defaults.\n- TLS/certificate errors surfaced as a clear, actionable error string rather\n  than a raw stack trace.\n- Redirect handling (including redirect loops).\n- Connection resets / DNS failures.\n- Retry with backoff for transient failures (timeouts, 5xx) \u2014 but do not retry\n  non-idempotent methods or 4xx responses.\n\nEvery failure mode should degrade to a clear `error: ...` string the calling\nmodel can read and react to, matching the existing convention in this\ncodebase where tool exceptions become readable error strings instead of\naborting the turn. Add or extend tests under `tests/` covering these failure\npaths (mock the transport, don't hit the real network in tests).\n\n## Part B \u2014 investigate packaging the engine as a deployable binary\n\nRight now this is a Python project run via `python app.py` / `python\ndummy_client.py` inside a venv. Investigate turning it into a single\ndeployable binary (PyInstaller, Nuitka, and shiv/zipapp are the obvious\ncandidates \u2014 pick one and justify the choice).\n\nScope this realistically: you do not need to solve full packaging in one PR.\nProduce:\n\n1. A working build for the core server + client path (`app.py`, headless\n   client) using your chosen tool, checked into the repo as a build script\n   (e.g. `scripts/build_binary.sh` or similar) that someone else can re-run.\n2. A short written doc (e.g. `docs/packaging.md`) explaining what does *not*\n   survive naive bundling and why: tree-sitter grammar packages, `npx`-spawned\n   language servers (pyright, typescript-language-server), `gopls`, and\n   Playwright's browser binaries are the known trouble spots \u2014 investigate\n   each rather than assuming, and write down what you actually found. State\n   clearly what a *full* solution would require, as a scoped follow-up plan,\n   rather than trying to solve all of it here.\n\nWhen you are done, close with a single clear paragraph summarizing exactly\nwhat you changed (both parts) \u2014 that summary becomes the pull request's title\nand body verbatim, so make it read like a real PR description. Be explicit in\nthat summary about what Part B's prototype does and does not cover.\n",
+    "run_id": "codeloom-engine",
+    "started_at": 1790384862.0,
+    "finished_at": 1790387237.7785292,
+    "engine_commit": "4e204d21101e3098b80fe5623d45947659784b8c",
+    "target_commit_base": "1448031284bb90d6cd3eeba137797848599c545c",
+    "target_commit_head": "f0217426df9fca96cdc1c7572f56bc9aa7617a22",
+    "settle": "pr",
+    "run_status": "ok",
+    "run_detail": ""
+  },
+  "stats": {
+    "session_id": "72381ee9ee74404dad2171489b4a7213",
+    "cost": 4.1394402999999995,
+    "prompt_tokens": 6267973,
+    "completion_tokens": 182550,
+    "cached_tokens": 5806879,
+    "total_tokens": 6450523,
+    "requests": 171,
+    "turns": 171,
+    "tool_calls": 249,
+    "elapsed_s": 225.81782029091846,
+    "agents": [
+      {
+        "profile": "researcher",
+        "agent_id": "7a9608f13a3e49ef818cf146a731f37e",
+        "cost": 0.35432670000000005
+      },
+      {
+        "profile": "ask",
+        "agent_id": "8c17ceed424b4d30b185ac478c53f3c4",
+        "cost": 0.43751010000000007
+      },
+      {
+        "profile": "coder",
+        "agent_id": "a5cba2552f3a48ba90d283d45213b790",
+        "cost": 1.6540565999999999
+      },
+      {
+        "profile": "coder",
+        "agent_id": "5451db7a64a2491a8b01f2b286398a97",
+        "cost": 0.5768926999999999
+      },
+      {
+        "profile": "reviewer",
+        "agent_id": "45defb6f97e04cfdb80e6efecfc3a890",
+        "cost": 0.0
+      },
+      {
+        "profile": "coder",
+        "agent_id": "6d9517e5a45d49cdab7bec098d3366cd",
+        "cost": 0.1645064
+      },
+      {
+        "profile": "reviewer",
+        "agent_id": "9a7e55aa0a314f62a78b14609ab5c329",
+        "cost": 0.32992499999999997
+      }
+    ],
+    "files_changed": 0,
+    "diffstat": "",
+    "error": "",
+    "prometheus_metrics": null
+  },
+  "verification": {
+    "language": "python",
+    "builds": true,
+    "has_tests": true,
+    "tests_pass": true
+  },
+  "code_review": {
+    "verdict": "needs-changes",
+    "summary": "Part A is a real improvement: failures in raw_request now come back as readable, classified error strings, the retry rules (idempotent methods only, 5xx and transient transport failures only) are correct, and the tests mock the transport and cover those rules. Mutation checks confirmed the tests actually exercise the retry logic. The main defect is operational. The async `http_request` tool calls the synchronous `raw_request` directly on the event loop, and the new retry loop adds `time.sleep` backoff plus up to 4x the per-attempt timeout. One GET to a hung host can now freeze the whole engine process for about 84s by default, while the in-code comment claims a worst case of 'a few seconds'. The retry also changes behaviour for every other caller of raw_request (get_json/fetch_text/web tools), not only http_request. The task asked for separate, configurable connect and read timeouts; there is still only the single urllib socket timeout. Error classification is written twice (once in the bare-exception branches, once in _classify_urlerror), and retry eligibility is decided by matching error-string prefixes, which breaks silently if a message is reworded. In Part B, docs/packaging.md contradicts itself: it says the build succeeded and collected the tree-sitter packages, then says tree-sitter was 'not build-verified\u2026 the build did not get that far'. It also refers to a 'policy documented above' that doesn't exist. The build script writes dist/, build/ and *.spec into the repo root, and none of these are in .gitignore. The binaries were only checked with `--help`, which for the client prints nothing, so there is little proof the bundled runtime works. The conftest.py ENGINE_TRACE_CALLS change is harmless but unrelated to the task.",
+    "findings": [
+      {
+        "id": "code-1",
+        "category": "correctness",
+        "severity": "high",
+        "file": "runtime/tools/httpx.py",
+        "line": 204,
+        "summary": "The retry loop calls blocking time.sleep, and raw_request runs synchronously inside the async `http_request` tool, so retries plus timeouts stall the engine's whole asyncio event loop.",
+        "failure_scenario": "tools/http.py's `async def http_request` calls `http_request_impl(...)` directly with no to_thread. A GET to a blackholed host with the default timeout=20 makes 4 attempts \u00d7 20s plus about 3.5\u20134.4s of sleep, roughly 84s. During that time the IPC server, every other subagent and the judge calls are all frozen. Before this PR the worst case was 20s.",
+        "suggested_fix": "Run the blocking call off the loop, e.g. `await asyncio.to_thread(http_request_impl, ...)` in tools/http.py. Also cap total wall time per call (an overall deadline across attempts), or scale max attempts to the timeout so that total time is at most about 2\u00d7 timeout."
+      },
+      {
+        "id": "code-2",
+        "category": "correctness",
+        "severity": "medium",
+        "file": "runtime/tools/httpx.py",
+        "line": 31,
+        "summary": "The comment says retries keep a tool call bounded to 'a few seconds', but the real worst case is (MAX_RETRIES+1)\u00d7timeout plus backoff, which is minutes-scale for user-supplied timeouts.",
+        "failure_scenario": "A model calls http_request with timeout=120 on a slow endpoint and gets back after about 8 minutes. The retry also applies to get_json/fetch_text and the web tools, which share raw_request, so their latency grows 4\u00d7 too without anyone opting in.",
+        "suggested_fix": "Fix the comment and add an overall deadline, or make the retry count a keyword argument on raw_request (default 0 for internal callers, enabled explicitly by http_request)."
+      },
+      {
+        "id": "code-3",
+        "category": "correctness",
+        "severity": "medium",
+        "file": "runtime/tools/httpx.py",
+        "line": 157,
+        "summary": "The task asked for separate, configurable connect and read timeouts; the change keeps one `timeout` that urllib applies per socket operation, and the only reported string is 'fetch timed out'.",
+        "failure_scenario": "A server that trickles one byte every 19s never trips the 20s read timeout, so the call can run for as long as the server likes. The model also can't tell whether the connect or the read timed out, so it can't tell an unreachable host from a slow one.",
+        "suggested_fix": "Add connect_timeout/read_timeout parameters, for example by opening the socket with its own connect timeout via a custom HTTPConnection, or enforce a total read deadline in the read loop. Say which phase timed out in the error string."
+      },
+      {
+        "id": "code-4",
+        "category": "simplification",
+        "severity": "medium",
+        "file": "runtime/tools/httpx.py",
+        "line": 120,
+        "summary": "Error classification exists twice: except-branches for bare exceptions and _classify_urlerror for URLError-wrapped ones. Retry eligibility for the URLError path is then decided by prefix-matching the rendered error string.",
+        "failure_scenario": "If someone rewords 'error: could not resolve host' in one place (say, to add the errno), `_is_retryable_error` stops matching. Wrapped DNS failures silently stop retrying while bare ones keep retrying, and no test catches it because the tests assert the exact strings.",
+        "suggested_fix": "Unwrap first (`cause = exc.reason if isinstance(exc, URLError) else exc`), then have one classifier return `(message, retryable)` and run a single retry decision from the one except block."
+      },
+      {
+        "id": "code-5",
+        "category": "correctness",
+        "severity": "low",
+        "file": "runtime/tools/httpx.py",
+        "line": 181,
+        "summary": "Every 5xx is retried, including 501 Not Implemented and 505, and Retry-After is ignored. The discarded HTTPError is never closed before the retry.",
+        "failure_scenario": "A server that answers 501 for an unsupported method gets 4 identical requests with about 3.5s of pointless sleep. A 503 carrying `Retry-After: 30` is hammered 4 times in under 5s. Each un-closed HTTPError keeps its socket open until GC.",
+        "suggested_fix": "Retry only on {500, 502, 503, 504}, honour Retry-After up to the cap, and call `exc.close()` before `continue`."
+      },
+      {
+        "id": "code-6",
+        "category": "test-coverage",
+        "severity": "medium",
+        "file": "tests/test_httpx_resilience.py",
+        "line": 101,
+        "summary": "The redirect test fakes an HTTPError with the 'infinite loop' text; nothing tests that _SafeRedirect.max_redirections=5 actually trips, or that the redirect-to-blocked-host/bad-scheme guard still works.",
+        "failure_scenario": "Two regressions would both pass the suite: dropping `max_redirections = MAX_REDIRECTS`, or CPython changing inf_msg wording so `_redirect_loop_error` stops matching, which would turn loops back into raw 30x passthroughs. Removing the blocked_host check on redirect hops, an SSRF regression, would also pass.",
+        "suggested_fix": "Add a test that drives the real opener with a stub handler/HTTPConnection returning 302\u2192self and asserts the error string. Add one that redirects to 169.254.169.254 and asserts the blocked-host error."
+      },
+      {
+        "id": "code-7",
+        "category": "style",
+        "severity": "low",
+        "file": "tests/test_httpx_resilience.py",
+        "line": 16,
+        "summary": "The `_ok_response` helper is defined but never used, while two tests re-implement the same inline contextmanager success response.",
+        "failure_scenario": "Dead code and duplicated fixtures make the test file harder to maintain.",
+        "suggested_fix": "Use `_ok_response()` in test_5xx_succeeds_on_second_attempt and test_get_retried_on_dns_failure_then_succeeds, or delete it."
+      },
+      {
+        "id": "code-8",
+        "category": "test-coverage",
+        "severity": "low",
+        "file": "tests/test_httpx_coverage.py",
+        "line": 193,
+        "summary": "An existing GET timeout test was switched to POST to dodge the new retries, so the first-attempt GET timeout path no longer has that coverage.",
+        "failure_scenario": "The test's intent changed from 'GET timeout returns error' to 'POST timeout returns error'. It would have been better to keep GET and monkeypatch time.sleep, as the new file does.",
+        "suggested_fix": "Keep method='GET', patch `http_impl.time.sleep`, and assert on the call count and the final error."
+      },
+      {
+        "id": "code-9",
+        "category": "correctness",
+        "severity": "medium",
+        "file": "docs/packaging.md",
+        "line": 139,
+        "summary": "The doc contradicts itself: the tree-sitter section still says it was 'not build-verified\u2026 the build did not get that far', while lines 104\u2013124 say the build completed and the grammars were collected.",
+        "failure_scenario": "A reader can't tell whether tree-sitter bundling was verified. This is exactly the 'investigate rather than assume' question the task asked the doc to answer. The follow-up coder updated other sections but left this stale paragraph.",
+        "suggested_fix": "Rewrite the section to say what was verified (the packages were collected into the bundle) and what wasn't (Language(...) loading at runtime from the frozen bundle). Ideally, run a smoke test that parses a file inside the bundle."
+      },
+      {
+        "id": "code-10",
+        "category": "style",
+        "severity": "low",
+        "file": "docs/packaging.md",
+        "line": 118,
+        "summary": "The doc says artifacts were deleted 'per the same policy documented above (re-runnable, not checked in)', but no such policy is documented anywhere above.",
+        "failure_scenario": "A dangling cross-reference left over from an earlier draft makes the doc read as unreviewed.",
+        "suggested_fix": "Remove the reference, or add a short 'Build artifacts' note, ideally alongside the .gitignore entries from code-11."
+      },
+      {
+        "id": "code-11",
+        "category": "correctness",
+        "severity": "medium",
+        "file": "scripts/build_binary.sh",
+        "line": 115,
+        "summary": "The script writes dist/, build/pyinstaller and agent-engine-*.spec into the repo root (no --specpath), and .gitignore has no entries for any of them. The reviewer's own search at trace lines 481/484 confirmed this.",
+        "failure_scenario": "Anyone who runs the script and then does `git add -A` commits a roughly 67MB build tree per bundle, plus generated spec files, into the repo.",
+        "suggested_fix": "Pass `--specpath build/pyinstaller` and add `dist/` and `build/` (or the specific paths) to .gitignore in the same PR."
+      },
+      {
+        "id": "code-12",
+        "category": "security",
+        "severity": "low",
+        "file": "scripts/build_binary.sh",
+        "line": 54,
+        "summary": "The script silently pip-installs an unpinned `pyinstaller` into whatever interpreter $PYTHON points to, which may be the system Python.",
+        "failure_scenario": "Running it outside a venv changes the global site-packages. The build is also not reproducible: a future PyInstaller release (e.g. one that changes collect_submodules' filter semantics) silently changes the output. The doc depends on 6.22.3 behaviour.",
+        "suggested_fix": "Pin the version (e.g. `pyinstaller==6.22.3`, or put it in a requirements-build.txt), refuse to install unless running in a venv or a flag such as `--install-deps` is passed, and print the pinned version."
+      },
+      {
+        "id": "code-13",
+        "category": "test-coverage",
+        "severity": "low",
+        "file": "scripts/build_binary.sh",
+        "line": 126,
+        "summary": "The 'working build' was checked only with `--help`. For the client that prints nothing and exits 0, so the lazily imported runtime paths (tree-sitter Language loading, the mcp client, the textual/headless IPC path) never ran in the frozen bundle.",
+        "failure_scenario": "A missing hidden import or data file in the bundle only shows up when the server first parses a file or the client connects. The PR body still says both bundles 'were actually built and run successfully'.",
+        "suggested_fix": "Add a smoke step: start agent-engine-server on a temp workspace, run agent-engine-client --auto against it, and check for a non-error response. At minimum, import runtime.tools.sitter and parse a snippet inside the bundle."
+      },
+      {
+        "id": "code-14",
+        "category": "style",
+        "severity": "low",
+        "file": "scripts/build_binary.sh",
+        "line": 136,
+        "summary": "The closing reminder lists Node, gopls and Playwright as host prerequisites but leaves out ripgrep (`rg`), which the header comment and the doc both list.",
+        "failure_scenario": "An operator going by the script's final output deploys without rg, and the search tool fails with 'rg not found'.",
+        "suggested_fix": "Add ripgrep to the final echo block."
+      },
+      {
+        "id": "code-15",
+        "category": "style",
+        "severity": "low",
+        "file": "tests/conftest.py",
+        "line": 41,
+        "summary": "The ENGINE_TRACE_CALLS isolation is a reasonable test-hygiene fix, but it is unrelated to Part A/B and was bundled in only because the engine's own shell exported the variable.",
+        "failure_scenario": "It widens the PR scope. The comment also mentions 'other ENGINE_* behavioural toggles', but only one variable is cleared, so ENGINE_JUDGE, ENGINE_MAX_CONTINUES and similar still leak (see trace line 446's printenv).",
+        "suggested_fix": "Split it into its own PR, or generalise it to clear every ENGINE_* variable that EngineConfig.from_env reads."
+      }
+    ]
+  },
+  "process_review": {
+    "verdict": "acceptable",
+    "summary": "The orchestrator split the work sensibly: an `ask` survey and a `researcher` comparison ran in parallel, then one coder did both parts in one worktree, a follow-up coder fixed the PyInstaller blocker, a harness-triggered fix-up coder fixed the env leak, and a reviewer re-ran verification with two mutation spot-checks. Read-before-edit was respected on every str_replace (httpx.py read at line 162 before 209/213; test_httpx_coverage at 169 before 218; build_binary.sh at 313 before 317/371; packaging.md at 311 before 396/401; conftest at 435 before 451), so there were 0 violations. Navigation leaned on search/read_file windows, which suited a mostly config/doc task; LSP tools were barely needed. There was real verification: the coder ran pytest at lines 227/238/248/300, the fix-up coder ran the full harness at 458 (1455 passed), and harness run_verify passed at 510. The waste came from several places. All three coders tried absolute `cd` into `.engine` and hit the same sandbox error (222, 363, 452). The researcher called web_search 3 more times after it was reported unavailable. There were duplicate list_files calls (254/255) and a malformed read_file with no path (147). Most costly, the first coder dismissed a failing test as 'pre-existing, unrelated' without checking. That cost a blocked reviewer cycle plus a fix-up coder, when an `env | grep` would have found the cause. The orchestrator's closing message was not the single-paragraph PR description the task asked for: the PR title came out as '[codeloom-engine] The reviewer approved the change', and the body includes chat preamble and a 'would you like me to merge' question. It also reported 'reviewed and approved' even though the engine had forced the reviewer verdict to request_changes. Cost ($4.14, 249 tool calls, about 40 min wall time) is reasonable for a two-part task that included real PyInstaller builds, though the ask and researcher surveys overlapped (both read requirements.txt, README 85\u2013104, httpx.py).",
+    "followed_navigation_hierarchy": true,
+    "read_before_edit_violations": 0,
+    "findings": [
+      {
+        "id": "process-1",
+        "category": "reasoning-gap",
+        "severity": "medium",
+        "agent_id": "a5cba2552f3a48ba90d283d45213b790",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 253
+        },
+        "summary": "The coder declared the test_session_trace failure 'pre-existing/unrelated' without checking the baseline or the environment. That led to a blocked reviewer run and a separate fix-up coder.",
+        "evidence": "Reasoning at line 253: 'Pre-existing failure unrelated to httpx.py changes (env var-based tracing config...). Confirmed via git stash check isn't necessary'. The only evidence was re-running the file alone (line 252), which still failed. The real cause was ENGINE_TRACE_CALLS=1 in the shell, which the fix-up coder found with `env | grep -i TRACE` at line 443. The reviewer at 45defb6f was then blocked by harness verify."
+      },
+      {
+        "id": "process-2",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "a5cba2552f3a48ba90d283d45213b790",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 222
+        },
+        "summary": "The coder ran a command with an absolute `cd` into the .engine worktree path and was rejected by the sandbox. It then spent two more calls working out its cwd.",
+        "evidence": "Line 221 `cd /repo 2>/dev/null || cd $(pwd); pwd; ls`, line 222 `cd /Users/.../.engine/worktrees/... && python3 -m pytest ...` \u2192 'error: commands may not touch .engine', line 224 `pwd && ls`. The loop_control judge at line 225 scored repeating_itself 0.57."
+      },
+      {
+        "id": "process-3",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "5451db7a64a2491a8b01f2b286398a97",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 363
+        },
+        "summary": "The follow-up coder repeated the same `.engine` absolute-cd mistake that the previous coder in the same worktree had already hit.",
+        "evidence": "Line 363: `cd /Users/iresharma/.../.engine/worktrees/a5cba... && python3 -c ...` \u2192 'error: commands may not touch .engine'."
+      },
+      {
+        "id": "process-4",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "6d9517e5a45d49cdab7bec098d3366cd",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 452
+        },
+        "summary": "The fix-up coder made the same `.engine` absolute-path mistake, the third agent in the run to do so.",
+        "evidence": "Line 452: `cd /Users/.../.engine/worktrees/a5cba... && python -m pytest -q tests/test_session_trace.py` \u2192 'error: commands may not touch .engine'. The retry without the cd at 454 succeeded."
+      },
+      {
+        "id": "process-5",
+        "category": "wasted-search",
+        "severity": "low",
+        "agent_id": "7a9608f13a3e49ef818cf146a731f37e",
+        "profile": "researcher",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 59
+        },
+        "summary": "The researcher called web_search three more times after the tool had already said it was unavailable.",
+        "evidence": "Line 14 returned 'error: web_search unavailable (set BRAVE_API_KEY); pass a URL to web_fetch instead'. Lines 59, 60 and 61 then called web_search again ('PyInstaller tree-sitter hidden import\u2026', 'Nuitka onefile subprocess\u2026', 'shiv zipapp requires python\u2026') and got the same error each time."
+      },
+      {
+        "id": "process-6",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "a5cba2552f3a48ba90d283d45213b790",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 255
+        },
+        "summary": "The coder called list_files with identical empty arguments twice in a row.",
+        "evidence": "Lines 254 and 255 are both `list_files {}` and return the same repository listing. The reasoning attached to both is the same 'Proceeding to Part B' / 'Now let's write scripts/build_binary.sh'."
+      },
+      {
+        "id": "process-7",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "8c17ceed424b4d30b185ac478c53f3c4",
+        "profile": "ask",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 147
+        },
+        "summary": "The ask agent made a read_file call with no arguments.",
+        "evidence": "Line 147 `read_file {}` \u2192 'error: read_file() missing 1 required positional argument: 'path''. Its stated reasoning was 'Let me quickly check README for architecture summary'."
+      },
+      {
+        "id": "process-8",
+        "category": "wasted-search",
+        "severity": "low",
+        "agent_id": "8c17ceed424b4d30b185ac478c53f3c4",
+        "profile": "ask",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 94
+        },
+        "summary": "The ask agent repeated near-identical searches (playwright in README, httpx/requests imports, shutil.which), and its reading overlapped heavily with the parallel researcher's.",
+        "evidence": "Line 84 searched `playwright install|PLAYWRIGHT_BROWSERS_PATH|playwright` in README.md, then line 94 searched `playwright` in README.md again. Lines 121/126/129 searched httpx/requests three ways, and lines 134/136 searched `shutil.which` twice. Lines 104/107 re-read README 85\u2013104 and 1250\u20131290, the same windows the researcher read at 55 and 39."
+      },
+      {
+        "id": "process-9",
+        "category": "scope-creep",
+        "severity": "medium",
+        "agent_id": "a5cba2552f3a48ba90d283d45213b790",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 272
+        },
+        "summary": "The coder pip-installed PyInstaller into the engine's own running venv (engine-venv), a side effect outside the worktree. The judge flagged the call as likely escaping the workspace.",
+        "evidence": "Line 272 `python3 -m pip install --quiet pyinstaller`; the exec_approval judge at 271 scored escapes_workspace 0.79. Later output at line 337 shows the install landed at `/Users/.../codeloom.engine/engine-venv/bin/pyi-makespec`. It was not cleaned up."
+      },
+      {
+        "id": "process-10",
+        "category": "reasoning-gap",
+        "severity": "low",
+        "agent_id": "a5cba2552f3a48ba90d283d45213b790",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 248
+        },
+        "summary": "Test and build commands were piped through `| tail`, so the run_command result reported exit_code 0 even when pytest or PyInstaller had failed. The trace's ok/exit status is unreliable for these calls.",
+        "evidence": "Line 248 `python3 -m pytest tests/ -q 2>&1 | tail -60` gives structured exit_code 0 while the output shows 'FAILED tests/test_session_trace.py::\u2026'. Lines 278 and 323 (`bash scripts/build_binary.sh 2>&1 | tail -150`) also report exit code 0 while showing the mcp.cli/typer SystemExit traceback."
+      },
+      {
+        "id": "process-11",
+        "category": "reasoning-gap",
+        "severity": "medium",
+        "agent_id": "9a7e55aa0a314f62a78b14609ab5c329",
+        "profile": "reviewer",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 478
+        },
+        "summary": "The reviewer read docs/packaging.md and noticed the stale 'not build-verified' tree-sitter paragraph, but treated it as honesty rather than a contradiction with the later success section. It also found no dist/build .gitignore entries and didn't flag that either.",
+        "evidence": "The reviewer's requirements table says ':139 explicitly flags tree-sitter as \"not build-verified\" before the fix, i.e. honest about depth of investigation'. Line 139 actually says 'the build did not get that far \u2014 see above', yet the doc goes on to report the build succeeded. The .gitignore searches at lines 481 and 484 both returned '(no matches)', and the verdict does not mention it."
+      },
+      {
+        "id": "process-12",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "9a7e55aa0a314f62a78b14609ab5c329",
+        "profile": "reviewer",
+        "trace_ref": {
+          "kind": "judge",
+          "line_in_trace_jsonl": 494
+        },
+        "summary": "The loop_control judge scored the reviewer's run as likely repeating itself (0.68) after a series of overlapping searches. The reviewer carried on with more redirect searches.",
+        "evidence": "Line 494 loop_control: repeating_itself 0.68, making_progress 0.32. It was preceded by duplicate .gitignore searches at 481/484 and followed by four overlapping redirect searches at 503/505/506/508 (`redirect|Redirect` in tests, then again in test_httpx_coverage.py)."
+      },
+      {
+        "id": "process-13",
+        "category": "reasoning-gap",
+        "severity": "low",
+        "agent_id": "orchestrator",
+        "profile": "orchestrator",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 309
+        },
+        "summary": "The orchestrator's follow-up brief steered the coder toward `--exclude-module mcp.cli`, which cannot work. The coder spent a build cycle proving that before switching to a custom hook; it recovered well, but the brief called that option 'should stop it from ever executing'.",
+        "evidence": "Line 309 brief: 'PyInstaller supports --exclude-module to prevent an import from being analyzed/pulled in at all, which should stop it from ever executing mcp/cli/cli.py's module-level import typer'. The coder applied it at 317, the build at 323 still hit the typer SystemExit, and the coder then diagnosed the cause at 326\u2013350 and wrote hook-mcp.py at 362."
+      },
+      {
+        "id": "process-14",
+        "category": "reasoning-gap",
+        "severity": "medium",
+        "agent_id": "orchestrator",
+        "profile": "orchestrator",
+        "summary": "The final message was not the single-paragraph PR description the task required, and it called the change approved even though the engine had overridden the reviewer to request_changes.",
+        "evidence": "transcript.md, 01:48:39 reviewer result: 'engine: verdict forced to request_changes (reviewer said approve) \u2014 instruction(s) with no disposition: Close with single clear paragraph PR summary'. The orchestrator's 01:49:00 message opens 'The reviewer approved the change\u2026', has a two-paragraph summary between --- rules, and ends 'Would you like me to merge\u2026'. The PR title in pr.md became '[codeloom-engine] The reviewer approved the change', and the body contains all of that chat text."
+      },
+      {
+        "id": "process-15",
+        "category": "judge-flag",
+        "severity": "low",
+        "agent_id": "a5cba2552f3a48ba90d283d45213b790",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "judge",
+          "line_in_trace_jsonl": 268
+        },
+        "summary": "About 20 of the 272 judge calls failed with null responses, including exec_approval, write_gate, call_verify and merge_gate gates, so some safety and quality gates did not produce a verdict for their tool calls.",
+        "evidence": "Line 268 exec_approval failed=true with response {} (before `chmod +x \u2026 && bash -n`). Failures by type: result_screen 8, loop_control 6, call_verify 2 (359, 368), write_gate 1 (360, before creating hook-mcp.py), merge_gate 1 (462), diagnostics_triage 1 (216). The run went ahead without those checks."
+      }
+    ]
+  },
+  "overall_assessment": {
+    "recommendation": "request-changes",
+    "strengths": [
+      "Retry rules are correct: idempotent methods only, 5xx and transient transport errors only, 4xx and POST/PATCH never. Mutation spot-checks (trace lines 488/490) confirmed the tests cover these branches.",
+      "Error strings are clear and name the host or URL for TLS, DNS, reset, timeout and redirect-loop failures, whether the exception arrives bare or wrapped in URLError, and tests cover both paths.",
+      "The existing contract that a final 5xx returns a normal tuple is preserved, so get_json/post_json/fetch_text behave as before.",
+      "Part B was investigated empirically: PyInstaller really was run, and the mcp.cli/typer SystemExit blocker was reproduced and root-caused. The attempt that failed (`--exclude-module`) is written up, and the fix (a filter-based hook) was verified with a real build.",
+      "Read-before-edit held with 0 violations, and the full harness passed (1455 passed) before the PR opened."
+    ],
+    "concerns": [
+      "The blocking time.sleep retry loop runs on the asyncio event loop through the async http_request tool, so one flaky host can freeze the whole engine for over a minute.",
+      "No separate connect and read timeouts, even though the task asked for them explicitly.",
+      "The retry behaviour applies to every raw_request caller, not only the http_request tool.",
+      "docs/packaging.md contradicts itself about whether tree-sitter bundling was verified, and has a dangling 'policy' reference.",
+      "The build script leaves dist/, build/ and *.spec in the repo root with no .gitignore entries, and pip-installs an unpinned PyInstaller.",
+      "Build verification was only `--help`, which is effectively a no-op for the client.",
+      "The PR title and body are chat output rather than the requested single-paragraph description, and the orchestrator said 'approved' after the engine had forced request_changes."
+    ],
+    "narrative": "The engine produced a solid first draft on both parts and verified more than most runs do: real PyInstaller builds, mutation-tested retries, and a green full harness. Process mistakes were mostly cheap: repeated sandbox cd errors, retries of an unavailable web_search, duplicate listings. The expensive one was the first coder waving off a failing test as 'pre-existing', which cost a blocked review and an extra coder. On the code side, the main problem is one nobody in the run looked for. The async tool calls synchronous I/O, and the new sleep-and-retry loop turns a 20s stall into an 84s engine-wide freeze. Combined with the missing connect/read timeout split, the self-contradicting packaging doc, the missing .gitignore entries and a PR body that is chat output, this needs another pass before merging. The fixes are small and well understood."
+  },
+  "links": {
+    "pr_url": "https://github.com/iresharma/codeloom.engine/pull/42",
+    "repo_url": "git@github.com:iresharma/codeloom.engine.git",
+    "diff_url": "https://github.com/iresharma/codeloom.engine/pull/42.diff",
+    "trace_file": "/Users/iresharma/Documents/codeloom/pr_trials/runs/codeloom.engine/repo/.engine/trace.jsonl",
+    "session_db": "/Users/iresharma/Documents/codeloom/pr_trials/runs/codeloom.engine/repo/.engine/session.db"
+  }
+}
