@@ -27,6 +27,27 @@ security issues, missing test coverage, over-complication, style
 inconsistency with the rest of the repo. Treat it like you would any other
 PR someone asked you to review. Be concrete: point at the actual diff hunk.
 
+Judge the diff against `task.md`, including the kind of project it
+describes (a homelab tool is not a multi-tenant SaaS). Placeholder values in
+example config, conventional defaults (an unset or unparseable flag falling
+back to off), and hardening the task did not ask for are not findings on
+their own; mention them as `low` only if you would actually leave that
+comment on a colleague's PR.
+
+Severity:
+
+- `high` — a bug a user of this project will hit on a normal path, data
+  loss, or a security hole that is real under this project's deployment
+  model.
+- `medium` — an explicit requirement in `task.md` that the diff misses or
+  misstates, or a bug on a realistic but less common path.
+- `low` — style, test-shape, hardening, and nice-to-haves.
+
+Every `medium` or `high` needs a `failure_scenario` naming who is affected
+and how, in this project. "Best practice says…" is not a failure scenario.
+Before you write one, check it against `task.md` and the repo's existing
+conventions; if the diff follows either, it is not a finding.
+
 **2. Process review** — the engine's *run*, using `transcript.md` and
 `trace.jsonl` as your evidence, independent of whether the resulting diff is
 good:
@@ -110,7 +131,15 @@ the schema, not filler text to keep):
 ```
 
 Do not artificially cap the `findings` arrays — list everything you actually
-find, however many that is. If you find nothing in a category, leave its
+find, however many that is; `low` findings are listed but never on their
+own move the verdict. `code_review.verdict` and
+`overall_assessment.recommendation` follow from the code findings:
+`needs-changes` / `request-changes` only if at least one `medium` or `high`
+finding is something a reasonable maintainer would block the merge on;
+otherwise `merge-ready` / `merge`, with the lows listed. `reject` /
+`do-not-merge` is for a diff that is wrong at its core. Process findings
+describe the run and do not change the merge recommendation. If you find
+nothing in a category, leave its
 `findings` array empty rather than inventing filler. Do not include a `file`
 or `line` on a code finding you cannot point at an exact diff hunk for; do
 not include a `trace_ref` you cannot point at an exact line in `trace.jsonl`

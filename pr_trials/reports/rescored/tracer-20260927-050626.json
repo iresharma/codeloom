@@ -1,0 +1,5110 @@
+{
+  "meta": {
+    "repo": "iresharma/tracer",
+    "pr_url": "https://github.com/iresharma/tracer/pull/6",
+    "pr_number": 6,
+    "task_prompt": "This repo's own README, in the \"Status\" section, flags a real gap: \"there's no\nauthentication in front of the UI or API, so don't expose the collector\nService outside the cluster without putting your own auth in front of it.\"\n\nFix that. Add authentication in front of the collector's HTTP surface:\n\n- The JSON/query API under `internal/collector/queryapi` and\n  `internal/collector/ingest`.\n- The server-rendered HTMX/Alpine UI under `internal/collector/ui`.\n\nUse a simple, self-hosted scheme appropriate for a homelab project \u2014 a\ntoken or basic-auth credential supplied via config/env, checked in\nmiddleware \u2014 not an external OAuth provider. Wire it through the same\nconfig mechanism the rest of the collector's settings already use (check how\nexisting ConfigMap-driven settings are read). Make sure the agent-to-collector\ningest path (`POST /api/v1/logs`) still works \u2014 that's service-to-service, not\na browser, so it likely needs its own credential rather than sharing the UI's.\n\nThis repo has real test coverage and a real convention for it. Match that\nconvention:\n\n- Add table-driven `_test.go` files for the new middleware/auth logic, in the\n  same style as the existing tests in `internal/collector/*`.\n- Run `go test ./...`, `make vet`, and `make fmt` before finishing, and make\n  sure all three are clean \u2014 don't declare the task done otherwise.\n- Update `deploy/k8s/*.yaml` and the README/config docs if the new auth\n  setting needs to be provided at deploy time.\n\nWhen you are done, close with a single clear paragraph summarizing exactly\nwhat you changed and why \u2014 that summary becomes the pull request's title and\nbody verbatim, so make it read like a real PR description, not an internal\nnote.\n",
+    "run_id": "tracer",
+    "started_at": 1790463351.501343,
+    "finished_at": 1790464109.448722,
+    "engine_commit": "367830e22a09578b89af0fe9b341c9f1d572e00f",
+    "target_commit_base": "274b0ed277f93f5a7b78ba3639e8fdadd578810b",
+    "target_commit_head": "87eaccb436e378dc1a69185a4f58da8888b09e5f",
+    "settle": "pr",
+    "run_status": "ok",
+    "run_detail": ""
+  },
+  "stats": {
+    "session_id": "bb03f47647cd44c0a72c015c8664efa4",
+    "cost": 1.549867849999999,
+    "prompt_tokens": 3325840,
+    "completion_tokens": 60583,
+    "cached_tokens": 3092633,
+    "total_tokens": 3386423,
+    "requests": 108,
+    "turns": 108,
+    "tool_calls": 153,
+    "elapsed_s": 134.03533975197934,
+    "agents": [
+      {
+        "profile": "ask",
+        "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+        "cost": 0.2614118
+      },
+      {
+        "profile": "coder",
+        "agent_id": "71e9c13882384c5e9fed281a3af3385e",
+        "cost": 0.6396377000000001
+      },
+      {
+        "profile": "reviewer",
+        "agent_id": "d604cb2a471844d889aa53c833f683c9",
+        "cost": 0.1089244
+      },
+      {
+        "profile": "tester",
+        "agent_id": "134376545106495baf4c25fc0b3c3f38",
+        "cost": 0.25733175
+      }
+    ],
+    "files_changed": 0,
+    "diffstat": "",
+    "error": "",
+    "prometheus_metrics": {
+      "engine_agent_cost_usd": [
+        {
+          "labels": {
+            "agent_id": "",
+            "profile": "orchestrator"
+          },
+          "value": 0.2825622
+        },
+        {
+          "labels": {
+            "agent_id": "134376545106495baf4c25fc0b3c3f38",
+            "profile": "tester"
+          },
+          "value": 0.25733175
+        },
+        {
+          "labels": {
+            "agent_id": "71e9c13882384c5e9fed281a3af3385e",
+            "profile": "coder"
+          },
+          "value": 0.6396377000000001
+        },
+        {
+          "labels": {
+            "agent_id": "d604cb2a471844d889aa53c833f683c9",
+            "profile": "reviewer"
+          },
+          "value": 0.1089244
+        },
+        {
+          "labels": {
+            "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+            "profile": "ask"
+          },
+          "value": 0.2614118
+        }
+      ],
+      "engine_agent_duration_seconds": [
+        {
+          "labels": {
+            "agent_id": "134376545106495baf4c25fc0b3c3f38",
+            "profile": "tester"
+          },
+          "value": 203.0072836659965
+        },
+        {
+          "labels": {
+            "agent_id": "71e9c13882384c5e9fed281a3af3385e",
+            "profile": "coder"
+          },
+          "value": 254.62040437496034
+        },
+        {
+          "labels": {
+            "agent_id": "d604cb2a471844d889aa53c833f683c9",
+            "profile": "reviewer"
+          },
+          "value": 46.39188662497327
+        },
+        {
+          "labels": {
+            "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+            "profile": "ask"
+          },
+          "value": 159.73573662497802
+        }
+      ],
+      "engine_agent_finished": [
+        {
+          "labels": {
+            "agent_id": "134376545106495baf4c25fc0b3c3f38",
+            "profile": "tester",
+            "status": "ok"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "71e9c13882384c5e9fed281a3af3385e",
+            "profile": "coder",
+            "status": "ok"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "d604cb2a471844d889aa53c833f683c9",
+            "profile": "reviewer",
+            "status": "ok"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+            "profile": "ask",
+            "status": "ok"
+          },
+          "value": 1
+        }
+      ],
+      "engine_agent_requests": [
+        {
+          "labels": {
+            "agent_id": "",
+            "profile": "orchestrator"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "agent_id": "134376545106495baf4c25fc0b3c3f38",
+            "profile": "tester"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "agent_id": "71e9c13882384c5e9fed281a3af3385e",
+            "profile": "coder"
+          },
+          "value": 32
+        },
+        {
+          "labels": {
+            "agent_id": "d604cb2a471844d889aa53c833f683c9",
+            "profile": "reviewer"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+            "profile": "ask"
+          },
+          "value": 17
+        }
+      ],
+      "engine_agent_spawned": [
+        {
+          "labels": {
+            "agent_id": "134376545106495baf4c25fc0b3c3f38",
+            "profile": "tester"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "71e9c13882384c5e9fed281a3af3385e",
+            "profile": "coder"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "d604cb2a471844d889aa53c833f683c9",
+            "profile": "reviewer"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+            "profile": "ask"
+          },
+          "value": 1
+        }
+      ],
+      "engine_agent_tokens": [
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "cached",
+            "profile": "orchestrator"
+          },
+          "value": 99391
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "completion",
+            "profile": "orchestrator"
+          },
+          "value": 13355
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "prompt",
+            "profile": "orchestrator"
+          },
+          "value": 151048
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "reasoning",
+            "profile": "orchestrator"
+          },
+          "value": 4840
+        },
+        {
+          "labels": {
+            "agent_id": "",
+            "kind": "total",
+            "profile": "orchestrator"
+          },
+          "value": 164403
+        },
+        {
+          "labels": {
+            "agent_id": "134376545106495baf4c25fc0b3c3f38",
+            "kind": "cached",
+            "profile": "tester"
+          },
+          "value": 1336200
+        },
+        {
+          "labels": {
+            "agent_id": "134376545106495baf4c25fc0b3c3f38",
+            "kind": "completion",
+            "profile": "tester"
+          },
+          "value": 10764
+        },
+        {
+          "labels": {
+            "agent_id": "134376545106495baf4c25fc0b3c3f38",
+            "kind": "prompt",
+            "profile": "tester"
+          },
+          "value": 1392157
+        },
+        {
+          "labels": {
+            "agent_id": "134376545106495baf4c25fc0b3c3f38",
+            "kind": "reasoning",
+            "profile": "tester"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "agent_id": "134376545106495baf4c25fc0b3c3f38",
+            "kind": "total",
+            "profile": "tester"
+          },
+          "value": 1402921
+        },
+        {
+          "labels": {
+            "agent_id": "71e9c13882384c5e9fed281a3af3385e",
+            "kind": "cached",
+            "profile": "coder"
+          },
+          "value": 1240161
+        },
+        {
+          "labels": {
+            "agent_id": "71e9c13882384c5e9fed281a3af3385e",
+            "kind": "completion",
+            "profile": "coder"
+          },
+          "value": 21627
+        },
+        {
+          "labels": {
+            "agent_id": "71e9c13882384c5e9fed281a3af3385e",
+            "kind": "prompt",
+            "profile": "coder"
+          },
+          "value": 1310308
+        },
+        {
+          "labels": {
+            "agent_id": "71e9c13882384c5e9fed281a3af3385e",
+            "kind": "reasoning",
+            "profile": "coder"
+          },
+          "value": 756
+        },
+        {
+          "labels": {
+            "agent_id": "71e9c13882384c5e9fed281a3af3385e",
+            "kind": "total",
+            "profile": "coder"
+          },
+          "value": 1331935
+        },
+        {
+          "labels": {
+            "agent_id": "d604cb2a471844d889aa53c833f683c9",
+            "kind": "cached",
+            "profile": "reviewer"
+          },
+          "value": 114862
+        },
+        {
+          "labels": {
+            "agent_id": "d604cb2a471844d889aa53c833f683c9",
+            "kind": "completion",
+            "profile": "reviewer"
+          },
+          "value": 2786
+        },
+        {
+          "labels": {
+            "agent_id": "d604cb2a471844d889aa53c833f683c9",
+            "kind": "prompt",
+            "profile": "reviewer"
+          },
+          "value": 138102
+        },
+        {
+          "labels": {
+            "agent_id": "d604cb2a471844d889aa53c833f683c9",
+            "kind": "reasoning",
+            "profile": "reviewer"
+          },
+          "value": 312
+        },
+        {
+          "labels": {
+            "agent_id": "d604cb2a471844d889aa53c833f683c9",
+            "kind": "total",
+            "profile": "reviewer"
+          },
+          "value": 140888
+        },
+        {
+          "labels": {
+            "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+            "kind": "cached",
+            "profile": "ask"
+          },
+          "value": 302019
+        },
+        {
+          "labels": {
+            "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+            "kind": "completion",
+            "profile": "ask"
+          },
+          "value": 12051
+        },
+        {
+          "labels": {
+            "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+            "kind": "prompt",
+            "profile": "ask"
+          },
+          "value": 334225
+        },
+        {
+          "labels": {
+            "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+            "kind": "reasoning",
+            "profile": "ask"
+          },
+          "value": 461
+        },
+        {
+          "labels": {
+            "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+            "kind": "total",
+            "profile": "ask"
+          },
+          "value": 346276
+        }
+      ],
+      "engine_errors": [
+        {
+          "labels": {
+            "kind": "tool"
+          },
+          "value": 3
+        }
+      ],
+      "engine_judge_cost_usd": 0,
+      "engine_judge_decisions": [
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "allow",
+            "tag": "exec_approval"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "prompt",
+            "tag": "exec_approval"
+          },
+          "value": 24
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "ranked",
+            "tag": "search_rerank"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "enforced": "true",
+            "outcome": "summary",
+            "tag": "merge_gate"
+          },
+          "value": 4
+        }
+      ],
+      "engine_judge_info": [
+        {
+          "labels": {
+            "model": "jev-latest"
+          },
+          "value": 1
+        }
+      ],
+      "engine_judge_request_duration_seconds_bucket": [
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.4"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "0.8"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "1.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "3"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "diagnostics_triage",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.4"
+          },
+          "value": 19
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "0.8"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "1.5"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "3"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "tag": "exec_approval",
+            "le": "+Inf"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.4"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "0.8"
+          },
+          "value": 31
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "1.5"
+          },
+          "value": 31
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "3"
+          },
+          "value": 31
+        },
+        {
+          "labels": {
+            "tag": "loop_control",
+            "le": "+Inf"
+          },
+          "value": 31
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.4"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "0.8"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "1.5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "3"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "tag": "merge_gate",
+            "le": "+Inf"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.4"
+          },
+          "value": 48
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "0.8"
+          },
+          "value": 59
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "1.5"
+          },
+          "value": 60
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "3"
+          },
+          "value": 61
+        },
+        {
+          "labels": {
+            "tag": "result_screen",
+            "le": "+Inf"
+          },
+          "value": 61
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.4"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "0.8"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "1.5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "3"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "tag": "search_rerank",
+            "le": "+Inf"
+          },
+          "value": 4
+        }
+      ],
+      "engine_judge_request_duration_seconds_sum": [
+        {
+          "labels": {
+            "tag": "diagnostics_triage"
+          },
+          "value": 0.45
+        },
+        {
+          "labels": {
+            "tag": "exec_approval"
+          },
+          "value": 8.301
+        },
+        {
+          "labels": {
+            "tag": "loop_control"
+          },
+          "value": 11.171999999999999
+        },
+        {
+          "labels": {
+            "tag": "merge_gate"
+          },
+          "value": 1.89
+        },
+        {
+          "labels": {
+            "tag": "result_screen"
+          },
+          "value": 24.35500000000001
+        },
+        {
+          "labels": {
+            "tag": "search_rerank"
+          },
+          "value": 1.802
+        }
+      ],
+      "engine_judge_request_duration_seconds_count": [
+        {
+          "labels": {
+            "tag": "diagnostics_triage"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "tag": "exec_approval"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "tag": "loop_control"
+          },
+          "value": 31
+        },
+        {
+          "labels": {
+            "tag": "merge_gate"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "tag": "result_screen"
+          },
+          "value": 61
+        },
+        {
+          "labels": {
+            "tag": "search_rerank"
+          },
+          "value": 4
+        }
+      ],
+      "engine_judge_request_duration_seconds_created": [
+        {
+          "labels": {
+            "tag": "diagnostics_triage"
+          },
+          "value": 1790463672.1265652
+        },
+        {
+          "labels": {
+            "tag": "exec_approval"
+          },
+          "value": 1790463796.202112
+        },
+        {
+          "labels": {
+            "tag": "loop_control"
+          },
+          "value": 1790463377.8749828
+        },
+        {
+          "labels": {
+            "tag": "merge_gate"
+          },
+          "value": 1790463523.497888
+        },
+        {
+          "labels": {
+            "tag": "result_screen"
+          },
+          "value": 1790463380.777569
+        },
+        {
+          "labels": {
+            "tag": "search_rerank"
+          },
+          "value": 1790463372.395056
+        }
+      ],
+      "engine_judge_requests": [
+        {
+          "labels": {
+            "result": "cache",
+            "tag": "exec_approval"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "result": "cache",
+            "tag": "result_screen"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "result": "cache",
+            "tag": "search_rerank"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "loop_control"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "result_screen"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "result": "error",
+            "tag": "search_rerank"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "diagnostics_triage"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "exec_approval"
+          },
+          "value": 23
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "loop_control"
+          },
+          "value": 31
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "merge_gate"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "result_screen"
+          },
+          "value": 61
+        },
+        {
+          "labels": {
+            "result": "ok",
+            "tag": "search_rerank"
+          },
+          "value": 4
+        }
+      ],
+      "engine_judge_tokens": [
+        {
+          "labels": {
+            "kind": "input"
+          },
+          "value": 285991
+        },
+        {
+          "labels": {
+            "kind": "output"
+          },
+          "value": 14293
+        },
+        {
+          "labels": {
+            "kind": "total"
+          },
+          "value": 300284
+        }
+      ],
+      "engine_llm_request_duration_seconds_bucket": [
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5",
+            "profile": "tester",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5",
+            "profile": "tester",
+            "le": "2"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5",
+            "profile": "tester",
+            "le": "5"
+          },
+          "value": 37
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5",
+            "profile": "tester",
+            "le": "10"
+          },
+          "value": 40
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5",
+            "profile": "tester",
+            "le": "20"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5",
+            "profile": "tester",
+            "le": "30"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5",
+            "profile": "tester",
+            "le": "60"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5",
+            "profile": "tester",
+            "le": "120"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5",
+            "profile": "tester",
+            "le": "300"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5",
+            "profile": "tester",
+            "le": "600"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5",
+            "profile": "tester",
+            "le": "+Inf"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "5"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "10"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "20"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "30"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "60"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "120"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "300"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "600"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask",
+            "le": "+Inf"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "5"
+          },
+          "value": 19
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "10"
+          },
+          "value": 24
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "20"
+          },
+          "value": 31
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "30"
+          },
+          "value": 31
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "60"
+          },
+          "value": 32
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "120"
+          },
+          "value": 32
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "300"
+          },
+          "value": 32
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "600"
+          },
+          "value": 32
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder",
+            "le": "+Inf"
+          },
+          "value": 32
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "5"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "10"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "20"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "30"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "60"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "120"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "300"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "600"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator",
+            "le": "+Inf"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "2"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "5"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "10"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "20"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "30"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "60"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "120"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "300"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "600"
+          },
+          "value": 8
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer",
+            "le": "+Inf"
+          },
+          "value": 8
+        }
+      ],
+      "engine_llm_request_duration_seconds_sum": [
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5",
+            "profile": "tester"
+          },
+          "value": 161.70818232896272
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask"
+          },
+          "value": 149.95709474902833
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder"
+          },
+          "value": 228.21996041596867
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator"
+          },
+          "value": 145.4461604160606
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer"
+          },
+          "value": 44.7224379159743
+        }
+      ],
+      "engine_llm_request_duration_seconds_count": [
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5",
+            "profile": "tester"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder"
+          },
+          "value": 32
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer"
+          },
+          "value": 8
+        }
+      ],
+      "engine_llm_request_duration_seconds_created": [
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5",
+            "profile": "tester"
+          },
+          "value": 1790463871.922663
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "ask"
+          },
+          "value": 1790463368.5531461
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "coder"
+          },
+          "value": 1790463619.894571
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "orchestrator"
+          },
+          "value": 1790463363.764564
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5",
+            "profile": "reviewer"
+          },
+          "value": 1790463872.412765
+        }
+      ],
+      "engine_model_cost_usd": [
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5"
+          },
+          "value": 0.25733175
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 1.2925360999999997
+        }
+      ],
+      "engine_model_requests": [
+        {
+          "labels": {
+            "model": "anthropic/claude-haiku-4.5"
+          },
+          "value": 42
+        },
+        {
+          "labels": {
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 66
+        }
+      ],
+      "engine_model_tokens": [
+        {
+          "labels": {
+            "kind": "cached",
+            "model": "anthropic/claude-haiku-4.5"
+          },
+          "value": 1336200
+        },
+        {
+          "labels": {
+            "kind": "cached",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 1756433
+        },
+        {
+          "labels": {
+            "kind": "completion",
+            "model": "anthropic/claude-haiku-4.5"
+          },
+          "value": 10764
+        },
+        {
+          "labels": {
+            "kind": "completion",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 49819
+        },
+        {
+          "labels": {
+            "kind": "prompt",
+            "model": "anthropic/claude-haiku-4.5"
+          },
+          "value": 1392157
+        },
+        {
+          "labels": {
+            "kind": "prompt",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 1933683
+        },
+        {
+          "labels": {
+            "kind": "reasoning",
+            "model": "anthropic/claude-haiku-4.5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "kind": "reasoning",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 6369
+        },
+        {
+          "labels": {
+            "kind": "total",
+            "model": "anthropic/claude-haiku-4.5"
+          },
+          "value": 1402921
+        },
+        {
+          "labels": {
+            "kind": "total",
+            "model": "anthropic/claude-sonnet-5"
+          },
+          "value": 1983502
+        }
+      ],
+      "engine_run_agents_live": 0,
+      "engine_run_agents_spawned": 4,
+      "engine_run_cost_usd": 1.549867849999999,
+      "engine_run_elapsed_seconds": 134.03533975197934,
+      "engine_run_files_edited": 20,
+      "engine_run_files_unique": 15,
+      "engine_run_info": [
+        {
+          "labels": {
+            "session_id": "bb03f47647cd44c0a72c015c8664efa4",
+            "workspace": "repo"
+          },
+          "value": 1
+        }
+      ],
+      "engine_run_last_turn_cost_usd": 0.0090074,
+      "engine_run_last_turn_tokens": 29103,
+      "engine_run_llm_turns": 108,
+      "engine_run_requests": 108,
+      "engine_run_tokens": [
+        {
+          "labels": {
+            "kind": "cached"
+          },
+          "value": 3092633
+        },
+        {
+          "labels": {
+            "kind": "completion"
+          },
+          "value": 60583
+        },
+        {
+          "labels": {
+            "kind": "prompt"
+          },
+          "value": 3325840
+        },
+        {
+          "labels": {
+            "kind": "reasoning"
+          },
+          "value": 6369
+        },
+        {
+          "labels": {
+            "kind": "total"
+          },
+          "value": 3386423
+        }
+      ],
+      "engine_run_tool_calls": 153,
+      "engine_tool_calls": [
+        {
+          "labels": {
+            "ok": "false",
+            "profile": "ask",
+            "tool": "list_symbols"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "false",
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "false",
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "list_symbols"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 9
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "create_file"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "list_files"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "get_diagnostics"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "reviewer",
+            "tool": "todo_scan"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "tester",
+            "tool": "list_files"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "tester",
+            "tool": "read_file"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "tester",
+            "tool": "run_command"
+          },
+          "value": 22
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "tester",
+            "tool": "runtime_info"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "tester",
+            "tool": "search"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "ok": "true",
+            "profile": "tester",
+            "tool": "str_replace"
+          },
+          "value": 3
+        }
+      ],
+      "engine_tool_duration_seconds_bucket": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "2"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "15"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "30"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "60"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "120"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols",
+            "le": "+Inf"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "0.5"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "1"
+          },
+          "value": 11
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "2"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "5"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "15"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "30"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "60"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "120"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file",
+            "le": "+Inf"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.01"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.05"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.1"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "0.5"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "1"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "2"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "5"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "15"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "30"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "60"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "120"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember",
+            "le": "+Inf"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.01"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.05"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.1"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "0.5"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "1"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "2"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "5"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "15"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "30"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "60"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "120"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search",
+            "le": "+Inf"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "0.5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "2"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "5"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "15"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "30"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "60"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "120"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file",
+            "le": "+Inf"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.05"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.1"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "0.5"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "1"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "2"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "5"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "15"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "30"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "60"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "120"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics",
+            "le": "+Inf"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.01"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.05"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.1"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "0.5"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "1"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "2"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "5"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "15"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "30"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "60"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "120"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file",
+            "le": "+Inf"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.01"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.05"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.1"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "0.5"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "1"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "2"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "5"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "15"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "30"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "60"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "120"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember",
+            "le": "+Inf"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "2"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "5"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "15"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "30"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "60"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "120"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command",
+            "le": "+Inf"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.05"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "0.5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "2"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "15"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "30"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "60"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "120"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search",
+            "le": "+Inf"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "0.5"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "1"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "2"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "5"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "15"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "30"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "60"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "120"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace",
+            "le": "+Inf"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.01"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics",
+            "le": "0.01"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics",
+            "le": "0.05"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics",
+            "le": "0.1"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics",
+            "le": "0.5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics",
+            "le": "1"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics",
+            "le": "2"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics",
+            "le": "5"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics",
+            "le": "15"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics",
+            "le": "30"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics",
+            "le": "60"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics",
+            "le": "120"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics",
+            "le": "+Inf"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.01"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.05"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.1"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "0.5"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "1"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "2"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "5"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "15"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "30"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "60"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "120"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file",
+            "le": "+Inf"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "0.01"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "0.05"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "0.1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "0.5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "2"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "15"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "30"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "60"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "120"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan",
+            "le": "+Inf"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file",
+            "le": "0.01"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file",
+            "le": "0.05"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file",
+            "le": "0.1"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file",
+            "le": "0.5"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file",
+            "le": "1"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file",
+            "le": "2"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file",
+            "le": "5"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file",
+            "le": "15"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file",
+            "le": "30"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file",
+            "le": "60"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file",
+            "le": "120"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file",
+            "le": "+Inf"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command",
+            "le": "0.05"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command",
+            "le": "0.1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command",
+            "le": "0.5"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command",
+            "le": "1"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command",
+            "le": "2"
+          },
+          "value": 19
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command",
+            "le": "5"
+          },
+          "value": 22
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command",
+            "le": "15"
+          },
+          "value": 22
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command",
+            "le": "30"
+          },
+          "value": 22
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command",
+            "le": "60"
+          },
+          "value": 22
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command",
+            "le": "120"
+          },
+          "value": 22
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command",
+            "le": "+Inf"
+          },
+          "value": 22
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info",
+            "le": "0.5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info",
+            "le": "1"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info",
+            "le": "2"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info",
+            "le": "5"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info",
+            "le": "15"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info",
+            "le": "30"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info",
+            "le": "60"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info",
+            "le": "120"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info",
+            "le": "+Inf"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search",
+            "le": "0.05"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search",
+            "le": "0.1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search",
+            "le": "0.5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search",
+            "le": "1"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search",
+            "le": "2"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search",
+            "le": "5"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search",
+            "le": "15"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search",
+            "le": "30"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search",
+            "le": "60"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search",
+            "le": "120"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search",
+            "le": "+Inf"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace",
+            "le": "0.01"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace",
+            "le": "0.05"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace",
+            "le": "0.1"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace",
+            "le": "0.5"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace",
+            "le": "1"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace",
+            "le": "2"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace",
+            "le": "5"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace",
+            "le": "15"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace",
+            "le": "30"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace",
+            "le": "60"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace",
+            "le": "120"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace",
+            "le": "+Inf"
+          },
+          "value": 3
+        }
+      ],
+      "engine_tool_duration_seconds_sum": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols"
+          },
+          "value": 1.307
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 6.027
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 0.018000000000000002
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 3.791999999999999
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file"
+          },
+          "value": 2.3040000000000003
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 0.46599999999999997
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files"
+          },
+          "value": 0.019
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 3.1289999999999996
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 0.027999999999999997
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 11.154
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 0.082
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 6.623000000000001
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 0
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 0.104
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics"
+          },
+          "value": 0.027
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 0.137
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 0.087
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 0.317
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan"
+          },
+          "value": 0.001
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files"
+          },
+          "value": 0.015
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file"
+          },
+          "value": 4.148999999999999
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command"
+          },
+          "value": 30
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info"
+          },
+          "value": 0.126
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search"
+          },
+          "value": 0.045
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace"
+          },
+          "value": 2.23
+        }
+      ],
+      "engine_tool_duration_seconds_count": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 12
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 10
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 16
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file"
+          },
+          "value": 3
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 7
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 15
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 6
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 14
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics"
+          },
+          "value": 4
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 5
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file"
+          },
+          "value": 17
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command"
+          },
+          "value": 22
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info"
+          },
+          "value": 1
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search"
+          },
+          "value": 2
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace"
+          },
+          "value": 3
+        }
+      ],
+      "engine_tool_duration_seconds_created": [
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "list_symbols"
+          },
+          "value": 1790463388.937807
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "read_file"
+          },
+          "value": 1790463380.7784011
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "remember"
+          },
+          "value": 1790463464.247657
+        },
+        {
+          "labels": {
+            "profile": "ask",
+            "tool": "search"
+          },
+          "value": 1790463372.399429
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "create_file"
+          },
+          "value": 1790463666.5192242
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "get_diagnostics"
+          },
+          "value": 1790463792.602745
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "list_files"
+          },
+          "value": 1790463623.57351
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "read_file"
+          },
+          "value": 1790463619.897323
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "remember"
+          },
+          "value": 1790463825.8380039
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "run_command"
+          },
+          "value": 1790463804.827164
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "search"
+          },
+          "value": 1790463632.8470101
+        },
+        {
+          "labels": {
+            "profile": "coder",
+            "tool": "str_replace"
+          },
+          "value": 1790463657.076812
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "ask"
+          },
+          "value": 1790463363.767432
+        },
+        {
+          "labels": {
+            "profile": "orchestrator",
+            "tool": "coder"
+          },
+          "value": 1790463616.185858
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "get_diagnostics"
+          },
+          "value": 1790463887.145368
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_diff"
+          },
+          "value": 1790463872.5509582
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "git_status"
+          },
+          "value": 1790463883.016563
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "read_file"
+          },
+          "value": 1790463876.239093
+        },
+        {
+          "labels": {
+            "profile": "reviewer",
+            "tool": "todo_scan"
+          },
+          "value": 1790463898.279487
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "list_files"
+          },
+          "value": 1790463871.939214
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "read_file"
+          },
+          "value": 1790463874.6607192
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "run_command"
+          },
+          "value": 1790463883.449427
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "runtime_info"
+          },
+          "value": 1790463886.710368
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "search"
+          },
+          "value": 1790463983.575305
+        },
+        {
+          "labels": {
+            "profile": "tester",
+            "tool": "str_replace"
+          },
+          "value": 1790463926.74716
+        }
+      ],
+      "engine_worktrees_settled": [
+        {
+          "labels": {
+            "action": "pr",
+            "ok": "true",
+            "profile": "coder"
+          },
+          "value": 1
+        }
+      ],
+      "push_failure_time_seconds": 0,
+      "push_time_seconds": 1790464109.2919705
+    }
+  },
+  "verification": {
+    "language": "go",
+    "builds": true,
+    "new_vet_issues": 0,
+    "vet_clean": true,
+    "has_tests": true,
+    "tests_pass": true
+  },
+  "code_review": {
+    "verdict": "needs-changes",
+    "summary": "The Go side is solid and does what task.md asks. There are two stdlib middlewares in internal/collector/auth.go: Basic Auth for the UI and query API, and a separate Bearer token for POST /api/v1/logs. Credentials are compared in constant time. Wrapping happens at each call site, so the `instrument` metric labels don't change, and /healthz, /readyz and /metrics stay open. Config is loaded with the same flat-struct getEnv/getEnvInt style (plus a new getEnvBool). collector.New fails fast on half-configured auth. The agent sends the shared token through forwarder.Options, and the collector_test.go route-protection tables are a useful end-to-end check. The problem is in the Kubernetes wiring. The collector Deployment (envFrom secretRef) and the agent DaemonSet (secretKeyRef) both require the new tracer-collector-auth Secret, and neither is marked optional. The feature is sold as opt-in and off by default, and the DaemonSet comment calls the token a 'harmless no-op' when auth is disabled. But if that Secret doesn't exist, the collector pod and every agent pod fail to start, and the Secret template itself tells operators not to apply it as-is. That is a one-line fix per manifest, and I'd block on it. The rest are low: the new middleware unit tests are separate functions rather than the table-driven form task.md asked for, some tests claim more than they check, and one table field is dead.",
+    "findings": [
+      {
+        "id": "code-1",
+        "category": "correctness",
+        "severity": "medium",
+        "file": "deploy/k8s/collector-deployment.yaml",
+        "line": 39,
+        "summary": "The collector Deployment and agent DaemonSet both hard-require the new tracer-collector-auth Secret (no `optional: true`), so if the Secret is missing, both workloads fail to start even with AUTH_ENABLED=false.",
+        "failure_scenario": "A homelab operator doesn't want auth yet, so they leave AUTH_ENABLED=\"false\". collector-secret.yaml opens with 'MUST be replaced before applying ... Do not ... apply this file as-is', and the README says to generate the Secret out of band. So they skip applying that file, or they upgrade by re-applying only the changed Deployment/DaemonSet manifests. The kubelet then marks the collector pod (envFrom secretRef, collector-deployment.yaml:39-40) and every tracer-agent pod (secretKeyRef, agent-daemonset.yaml:46-50) as CreateContainerConfigError: secret \"tracer-collector-auth\" not found. Log collection stops cluster-wide. This contradicts the DaemonSet comment 'Harmless no-op when the collector has auth disabled' and the PR's claim that the feature is opt-in and backward compatible.",
+        "suggested_fix": "Add `optional: true` under the `secretRef` in collector-deployment.yaml and under the `secretKeyRef` for AUTH_INGEST_TOKEN in agent-daemonset.yaml. With auth off, a missing Secret then just means empty env vars. collector.New's fail-fast check still catches AUTH_ENABLED=true with no credentials."
+      },
+      {
+        "id": "code-2",
+        "category": "test-coverage",
+        "severity": "low",
+        "file": "internal/collector/auth_test.go",
+        "line": 530,
+        "summary": "task.md explicitly asks for table-driven tests for the new middleware, but auth_test.go has 11 near-identical standalone functions (build cfg, build request, assert status).",
+        "failure_scenario": "No runtime impact. It misses the stated test-shape requirement, and adding a case means copying a 13-line function. collector_test.go in the same PR already uses table-driven t.Run subtests, so the file isn't consistent with its own sibling. It does match the older per-function style in ingest/queryapi tests, which is why this is low.",
+        "suggested_fix": "Collapse into two tables, TestBasicAuthMiddleware and TestTokenAuthMiddleware, with fields {name, enabled, user, pass or header, wantStatus, wantWWWAuth}, and run them with t.Run."
+      },
+      {
+        "id": "code-3",
+        "category": "test-coverage",
+        "severity": "low",
+        "file": "internal/collector/auth_test.go",
+        "line": 641,
+        "summary": "The three 'DifferentLength' tests claim to verify constant-time comparison, but they only assert a 401 for wrong credentials, which the existing wrong-credential tests already cover.",
+        "failure_scenario": "The comment 'Ensures timing-constant comparison is used' is misleading. If secureCompare were replaced with a plain `==`, these tests would still pass, so they give false assurance about a security property.",
+        "suggested_fix": "Drop them, or fold them into the table as ordinary wrong-credential rows and remove the constant-time claim from the comment. If the property matters, test secureCompare directly with a small table of (a, b, want)."
+      },
+      {
+        "id": "code-4",
+        "category": "style",
+        "severity": "low",
+        "file": "internal/collector/collector_test.go",
+        "line": 905,
+        "summary": "The `expectNoWWWAuth` table field is `true` in every row, so it's a dead parameter rather than a varying input.",
+        "failure_scenario": "No runtime impact. Readers may think some rows expect a WWW-Authenticate header on the ingest path when none do.",
+        "suggested_fix": "Remove the field and assert unconditionally that the token-auth 401 has no WWW-Authenticate header."
+      },
+      {
+        "id": "code-5",
+        "category": "simplification",
+        "severity": "low",
+        "file": "internal/agent/forwarder/forwarder_test.go",
+        "line": 382,
+        "summary": "TestForwarderSendsAuthTokenInHeader and TestForwarderSendsNoAuthHeaderWhenTokenEmpty are about 30 identical lines each and differ only in the token and the expected header.",
+        "failure_scenario": "No runtime impact. It's duplicated polling and server setup that would drift if the forwarder test harness changes.",
+        "suggested_fix": "Merge into one table-driven test with rows {token: \"secret-token\", want: \"Bearer secret-token\"} and {token: \"\", want: \"\"}."
+      }
+    ]
+  },
+  "process_review": {
+    "verdict": "acceptable",
+    "summary": "The run had a sensible structure. The orchestrator ran an `ask` survey, then gave the coder a detailed, fact-filled spec. After that, the tester and reviewer ran automatically. The coder was efficient: it read each target file once before editing (0 read-before-edit violations), made about 20 targeted edits, and ran `go test ./...` (trace line 146), `make vet` (150) and `make fmt` (152), all ok:true with clean output. The tester re-ran all three after adding its own tests (281, ok:true). It also caught that `make fmt` is only `gofmt -l .` and exits 0 even when a file is listed (line 253 listed collector_test.go). It fixed that with `gofmt -w` (255) and re-verified (260, 281). So the task's 'all three clean' requirement really was met on the final tree. Most of the waste is in the ask agent. It used `search` with pattern '.' as a file lister, including a roughly 264k-character dump of internal/collector (line 5). It repeated that on deploy/k8s (lines 3, 40), searched README.md three times before reading it, and made a few failing calls. The tester also re-ran the full suite more often than needed. Judges raised nothing actionable. Two judge calls failed with empty responses (lines 115, 222) and the run carried on correctly. The reviewer approved without shell access and missed the non-optional Secret references. At about $1.55, 153 tool calls and about 12.6 minutes wall time for a 15-file, +580-line change, the budget was proportionate.",
+    "followed_navigation_hierarchy": false,
+    "read_before_edit_violations": 0,
+    "findings": [
+      {
+        "id": "process-1",
+        "category": "wasted-search",
+        "severity": "medium",
+        "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+        "profile": "ask",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 5
+        },
+        "summary": "The ask agent ran `search` with pattern '.' over all of internal/collector as a file lister, which dumped every line of every file (about 264k chars) instead of calling list_files.",
+        "evidence": "Line 5: search {\"pattern\": \".\", \"path\": \"internal/collector\"}. The paired judge record at line 4 shows \"truncated\": true, \"original_chars\": 263957. It then ran a second search {\"pattern\": \"^package\", ..., \"glob\": \"*.go\"} at line 8 to get the package list it actually wanted."
+      },
+      {
+        "id": "process-2",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+        "profile": "ask",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 40
+        },
+        "summary": "The ask agent repeated its earlier match-everything search of deploy/k8s, then made two more searches just to enumerate manifest files.",
+        "evidence": "Line 3: search {\"pattern\": \".\", \"path\": \"deploy/k8s\"} (judge line 2: original_chars 21395). Line 40: search {\"pattern\": \".\", \"path\": \"deploy/k8s\", \"glob\": \"*.yaml\"} (judge line 39: original_chars 21393), then line 42 ('^\\\\S.*\\\\.yaml$|^deploy/k8s', no matches) and line 44 ('kind:'). One list_files call would have answered this."
+      },
+      {
+        "id": "process-3",
+        "category": "wasted-search",
+        "severity": "low",
+        "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+        "profile": "ask",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 46
+        },
+        "summary": "README.md was searched three times with overlapping regexes before the agent just read the 28-line section it needed, and the loop_control judge scored it as repeating itself.",
+        "evidence": "Lines 41, 43 (no matches), and 46 all search README.md for HTTP_ADDR|RETENTION_DAYS|Configuration variants. read_file README.md offset 92 at line 50 finally answered the question. The loop_control judge at line 47 returned repeating_itself 0.59, the highest in the run."
+      },
+      {
+        "id": "process-4",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "e1d2bdad3e6a4822a3464ba8a33df464",
+        "profile": "ask",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 19
+        },
+        "summary": "Three tool calls failed on avoidable argument errors: list_symbols on a directory, search in a directory that doesn't exist, and remember on a directory path.",
+        "evidence": "Line 19: list_symbols {\"path\": \"internal/collector/ui\"} -> 'error: not a file'. Line 48: search in \"docs\" -> 'error: rg failed' (no docs/ directory). Line 59: remember {\"path\": \"deploy/k8s\"} -> 'error: missing file: deploy/k8s'. All three recovered without stalling the run."
+      },
+      {
+        "id": "process-5",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "71e9c13882384c5e9fed281a3af3385e",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 94
+        },
+        "summary": "The coder re-read files the ask survey had already covered and that it never edited, although its brief said 'FACTS ... already verified \u2014 do not re-derive'.",
+        "evidence": "Line 94: read_file internal/collector/ingest/http.go (result_screen judge line 93 cache_hit: true, meaning the ask agent had already read it at line 16). The coder made no edit to that file, and its own summary says 'The ingest handler ... needed zero changes'. deploy/k8s/agent-configmap.yaml (line 92) was also read and not edited. Re-reads of files it did edit are justified by read-before-edit."
+      },
+      {
+        "id": "process-6",
+        "category": "redundant-tool-call",
+        "severity": "low",
+        "agent_id": "134376545106495baf4c25fc0b3c3f38",
+        "profile": "tester",
+        "trace_ref": {
+          "kind": "tool",
+          "line_in_trace_jsonl": 294
+        },
+        "summary": "The tester ran the full suite five times and spent extra calls counting test names after everything was already green, plus one unexplained `cd /tmp && pwd`.",
+        "evidence": "go test ./... at lines 202, 250, 263, 281 (the combined test+vet+fmt run, the one that mattered) and again at 294 ('go test ./... -v | tail -50'). Lines 287 and 291 grep and wc -l the '=== RUN' lines. Line 193 runs 'cd /tmp && pwd', which has no bearing on the task."
+      },
+      {
+        "id": "process-7",
+        "category": "judge-flag",
+        "severity": "low",
+        "agent_id": "71e9c13882384c5e9fed281a3af3385e",
+        "profile": "coder",
+        "trace_ref": {
+          "kind": "judge",
+          "line_in_trace_jsonl": 115
+        },
+        "summary": "Two judge calls failed with empty responses (loop_control for the coder, and result_screen for a tester run at line 222). No judge produced an adverse verdict, and the run correctly carried on.",
+        "evidence": "Line 115: {\"kind\": \"judge\", \"tag\": \"loop_control\", \"failed\": true, \"response\": {}}. Line 222: {\"tag\": \"result_screen\", \"failed\": true, \"response\": {}} on 'go test -v ./internal/collector -run TestNew'. All other loop_control verdicts had repeating_itself at or below 0.59 and no needs_user_input spike. The merge_gate verdicts (lines 65, 162, 228, 300) didn't block."
+      },
+      {
+        "id": "process-8",
+        "category": "reasoning-gap",
+        "severity": "low",
+        "agent_id": "d604cb2a471844d889aa53c833f683c9",
+        "profile": "reviewer",
+        "trace_ref": {
+          "kind": "judge",
+          "line_in_trace_jsonl": 228
+        },
+        "summary": "The reviewer approved while saying it couldn't verify tests. It described auth_test.go as following the table-driven convention, which it doesn't, and it didn't catch that the new Secret references are non-optional despite the 'harmless no-op' comment it quoted.",
+        "evidence": "The reviewer read collector-secret.yaml (line 180) and the git diff (line 164). In its report it says 'agent-daemonset pulls AUTH_INGEST_TOKEN from the same Secret key, with a comment that it's a harmless no-op when auth disabled' and 'tests follow existing table-driven convention', with verdict 'approve'. It also says 'Could not independently execute go test ./..., make vet, make fmt (review tools have no shell access)'. Its merge_gate judge (line 228) scored accomplished_its_brief 0.73."
+      }
+    ]
+  },
+  "overall_assessment": {
+    "recommendation": "request-changes",
+    "strengths": [
+      "The auth design fits a homelab project: Basic Auth for browsers, a separate Bearer token for the agent ingest path, constant-time comparison, and probes and metrics left unauthenticated.",
+      "It follows the repo's existing flat-struct/env config convention and the existing `route`/`instrument` wiring without changing metric labels.",
+      "collector.New fails fast on AUTH_ENABLED=true with missing credentials, and a table-driven test covers each missing field.",
+      "The route-protection tests in collector_test.go exercise the real mux end to end, and the forwarder header behaviour is tested.",
+      "go test ./..., make vet and make fmt are verifiably clean on the final tree (trace lines 146/150/152, re-verified at 281). The tester noticed that `make fmt` exits 0 even when it lists files, and fixed the file it listed."
+    ],
+    "concerns": [
+      "The Deployment and DaemonSet hard-require the tracer-collector-auth Secret. Operators who keep auth off and follow the template's 'don't apply as-is' warning get pods stuck in CreateContainerConfigError, which contradicts the opt-in and backward-compatible claim.",
+      "The middleware unit tests aren't table-driven as task.md asked, and a few tests claim to verify constant-time behaviour they can't observe.",
+      "The reviewer stage added little independent assurance: it had no shell access and missed the manifest issue."
+    ],
+    "narrative": "This is a clean, well-scoped auth change. The code is correct, well tested at the HTTP layer, and verified against the task's three required checks. The one thing to fix before merge is the non-optional Secret references in the Kubernetes manifests. As written, operators who want auth off can still end up with non-starting collector and agent pods, and adding `optional: true` fixes it. The run itself was reasonably economical. The coder and tester were disciplined and the tester caught a real formatting miss. Most of the waste was the ask agent using match-everything searches as a file lister, and the reviewer approving without catching the deploy-time regression."
+  },
+  "links": {
+    "pr_url": "https://github.com/iresharma/tracer/pull/6",
+    "repo_url": "git@github.com:iresharma/tracer.git",
+    "diff_url": "https://github.com/iresharma/tracer/pull/6.diff",
+    "trace_file": "/Users/iresharma/Documents/codeloom/pr_trials/runs/tracer/repo/.engine/trace.jsonl",
+    "session_db": "/Users/iresharma/Documents/codeloom/pr_trials/runs/tracer/repo/.engine/session.db"
+  }
+}
