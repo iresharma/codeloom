@@ -19,3 +19,4 @@ ex_*_workspace/
 env.sh
 my_profile.jsonl
 temp.py
+.pnpm-store/
