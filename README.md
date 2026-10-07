@@ -10,6 +10,7 @@ repo (`codeloom.<name>`) and is mounted here as a submodule under `workspace/`.
 | `workspace/pages` | `codeloom.pages` | Project site and engine pages |
 | `workspace/experiments` | `codeloom.experiments` | Experiment write-ups |
 | `workspace/cloud-controller` | `codeloom.cloud-controller` | Cloud controller |
+| `workspace/web` | `codeloom.web` | Browser client for the cloud controller |
 
 Clone with submodules:
 
@@ -23,6 +24,7 @@ git submodule update --init --recursive
 
 | Script | Does |
 |---|---|
+| `scripts/run` | Start the cloud controller and the web client together (building any missing sandbox image first) and print the web client's URL |
 | `scripts/new <name> [--public]` | Create `workspace/<name>`, init it, and create the `codeloom.<name>` GitHub repo |
 | `scripts/sync-workspace` | Record inner repos under `workspace/` as submodules (or track their files if they have no origin) |
 | `scripts/pull [<name> \| .]` | Pull every inner repo then the outer one, or just one of them |

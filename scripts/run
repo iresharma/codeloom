@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+# Run the cloud controller and the web client together, locally.
+#
+# First run creates the controller's venv, installs the web client's
+# dependencies, and copies each project's .env.example if no .env exists yet
+# (fill in GitHub OAuth + model keys before anything GitHub-related works).
+# The controller builds any missing sandbox image on its own startup — the
+# first run can take several minutes for that alone.
+#
+# Usage:
+#   ./scripts/run
+#
+# Env overrides:
+#   CONTROLLER_PORT (default 8000), WEB_PORT (default 3000),
+#   CONTROLLER_READY_TIMEOUT seconds (default 900, covers a first-time image build)
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+CONTROLLER_DIR="$ROOT/workspace/cloud-controller"
+WEB_DIR="$ROOT/workspace/web"
+
+for dir in "$CONTROLLER_DIR" "$WEB_DIR"; do
+  if [[ ! -d "$dir" ]]; then
+    echo "error: $dir is missing — run ./scripts/pull first" >&2
+    exit 1
+  fi
+done
+
+CONTROLLER_PORT="${CONTROLLER_PORT:-8000}"
+WEB_PORT="${WEB_PORT:-3000}"
+CONTROLLER_READY_TIMEOUT="${CONTROLLER_READY_TIMEOUT:-900}"
+WEB_READY_TIMEOUT="${WEB_READY_TIMEOUT:-120}"
+
+CONTROLLER_URL="http://localhost:$CONTROLLER_PORT"
+WEB_URL="http://localhost:$WEB_PORT"
+
+LOG_DIR="$(mktemp -d "${TMPDIR:-/tmp}/codeloom-run.XXXXXX")"
+CONTROLLER_LOG="$LOG_DIR/cloud-controller.log"
+WEB_LOG="$LOG_DIR/web.log"
+
+CONTROLLER_PID=""
+WEB_PID=""
+
+cleanup() {
+  echo
+  echo "== stopping"
+  [[ -n "$WEB_PID" ]] && kill "$WEB_PID" 2>/dev/null || true
+  [[ -n "$CONTROLLER_PID" ]] && kill "$CONTROLLER_PID" 2>/dev/null || true
+  wait "$WEB_PID" "$CONTROLLER_PID" 2>/dev/null || true
+}
+trap cleanup EXIT
+# Explicit INT/TERM traps that exit (rather than relying on the default
+# disposition) so cleanup also runs when this script itself is backgrounded —
+# a shell ignores SIGINT/SIGTERM for a background job unless something traps it.
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+wait_for() {
+  local url="$1" label="$2" timeout="$3" log="$4"
+  local waited=0
+  until curl -fsS -o /dev/null "$url" 2>/dev/null; do
+    sleep 1
+    waited=$((waited + 1))
+    if (( waited >= timeout )); then
+      echo "error: $label did not come up at $url within ${timeout}s" >&2
+      echo "-- last 40 lines of $log --" >&2
+      tail -n 40 "$log" >&2 2>/dev/null || true
+      exit 1
+    fi
+  done
+}
+
+# --- cloud controller ---
+if [[ ! -d "$CONTROLLER_DIR/.venv" ]]; then
+  echo "== cloud-controller: creating venv + installing dependencies"
+  python3 -m venv "$CONTROLLER_DIR/.venv"
+  (cd "$CONTROLLER_DIR" && .venv/bin/pip install -q -e ".[dev]")
+fi
+
+if [[ ! -f "$CONTROLLER_DIR/.env" ]]; then
+  cp "$CONTROLLER_DIR/.env.example" "$CONTROLLER_DIR/.env"
+  echo "== cloud-controller: wrote .env from .env.example — fill in GitHub OAuth + model keys"
+fi
+
+echo "== cloud-controller: starting on :$CONTROLLER_PORT (log: $CONTROLLER_LOG)"
+(
+  cd "$CONTROLLER_DIR"
+  exec .venv/bin/python -m uvicorn codeloom_cloud.main:app --host 0.0.0.0 --port "$CONTROLLER_PORT"
+) >"$CONTROLLER_LOG" 2>&1 &
+CONTROLLER_PID=$!
+
+echo "== cloud-controller: waiting for $CONTROLLER_URL/health"
+echo "   (sandbox images build here on first run — this can take a while)"
+wait_for "$CONTROLLER_URL/health" "cloud controller" "$CONTROLLER_READY_TIMEOUT" "$CONTROLLER_LOG"
+echo "== cloud-controller: ready"
+
+# --- web client ---
+if [[ ! -d "$WEB_DIR/node_modules" ]]; then
+  echo "== web: installing dependencies"
+  (cd "$WEB_DIR" && npm install --silent)
+fi
+
+if [[ ! -f "$WEB_DIR/.env.local" ]]; then
+  cp "$WEB_DIR/.env.example" "$WEB_DIR/.env.local"
+fi
+
+echo "== web: starting on :$WEB_PORT (log: $WEB_LOG)"
+if [[ "$WEB_PORT" == "3000" ]]; then
+  WEB_CMD=(npm run dev)
+else
+  WEB_CMD=(npm run dev -- --port "$WEB_PORT")
+fi
+(
+  cd "$WEB_DIR"
+  exec "${WEB_CMD[@]}"
+) >"$WEB_LOG" 2>&1 &
+WEB_PID=$!
+
+echo "== web: waiting for $WEB_URL"
+wait_for "$WEB_URL" "web client" "$WEB_READY_TIMEOUT" "$WEB_LOG"
+
+echo
+echo "codeloom is running:"
+echo "  web client        $WEB_URL"
+echo "  cloud controller  $CONTROLLER_URL"
+echo
+echo "logs: $CONTROLLER_LOG, $WEB_LOG"
+echo "press ctrl-c to stop both"
+echo
+echo "WEB_URL=$WEB_URL"
+
+wait "$CONTROLLER_PID" "$WEB_PID"
