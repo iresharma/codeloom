@@ -1,0 +1,270 @@
+{
+  "run_id": "railway-calibration-headless-20261015",
+  "status": "passed",
+  "benchmark_commit": "bc839fd57f39dbf362ce7721b657be0781573b7a",
+  "engine_commit": "4450081a921f4c78c08faa6d4928c3d4b425d3c0",
+  "runtime_image": "sha256:7cbb60e88824a90a435962ea4d5028a70b5fa494b8adeb39b1da1de3ad4de391",
+  "suite_fingerprint": "88c7d1656f932726d7f2ed3e2d4fb9ad65eca3c3ac13eb140b631d72e5afbd6d",
+  "live_fingerprint_matches": true,
+  "compatibility_status": "passed",
+  "v1_certification_status": "interrupted",
+  "calibration_spend_usd": 0.392197,
+  "ledger": {
+    "confirmed_campaign_spend_usd": 1.441883,
+    "unknown_calls": 0,
+    "active_trials": 0
+  },
+  "attempts": [
+    {
+      "task_id": "dev-python",
+      "system": "engine-core",
+      "termination": "completed",
+      "controller_termination": "completed",
+      "elapsed_s": 1030.993524890975,
+      "evaluation_elapsed_s": 10.079207162023522,
+      "cost_usd": 0.25109,
+      "cost_is_conservative": false,
+      "request_count": 92,
+      "new_failing_check_commands": [],
+      "verification": {
+        "pass": true,
+        "reason": "verification",
+        "checks": [
+          {
+            "command": "python -m pytest -o addopts= -q tests",
+            "kind": "trusted",
+            "repeat": 0,
+            "returncode": 0
+          },
+          {
+            "command": "python -m pytest -o addopts= -q /tmp/oracle/check.py",
+            "kind": "hidden",
+            "repeat": 0,
+            "returncode": 0
+          }
+        ]
+      },
+      "patch_bytes": 5687
+    },
+    {
+      "task_id": "dev-python",
+      "system": "mini-swe-agent",
+      "termination": "completed",
+      "controller_termination": "completed",
+      "elapsed_s": 178.10873327904847,
+      "evaluation_elapsed_s": 9.04183975502383,
+      "cost_usd": 0.013067,
+      "cost_is_conservative": false,
+      "request_count": 16,
+      "new_failing_check_commands": [],
+      "verification": {
+        "pass": true,
+        "reason": "verification",
+        "checks": [
+          {
+            "command": "python -m pytest -o addopts= -q tests",
+            "kind": "trusted",
+            "repeat": 0,
+            "returncode": 0
+          },
+          {
+            "command": "python -m pytest -o addopts= -q /tmp/oracle/check.py",
+            "kind": "hidden",
+            "repeat": 0,
+            "returncode": 0
+          }
+        ]
+      },
+      "patch_bytes": 2744
+    },
+    {
+      "task_id": "dev-typescript",
+      "system": "engine-core",
+      "termination": "completed",
+      "controller_termination": "completed",
+      "elapsed_s": 1487.7365389059996,
+      "evaluation_elapsed_s": 177.5132524400251,
+      "cost_usd": 0.097171,
+      "cost_is_conservative": false,
+      "request_count": 69,
+      "new_failing_check_commands": [],
+      "verification": {
+        "pass": true,
+        "reason": "verification",
+        "checks": [
+          {
+            "command": "npm run build",
+            "kind": "trusted",
+            "repeat": 0,
+            "returncode": 0
+          },
+          {
+            "command": "node --import=tsx/esm --test --test-timeout=60000 test/*.ts",
+            "kind": "trusted",
+            "repeat": 0,
+            "returncode": 0
+          },
+          {
+            "command": "node --import=tsx/esm /tmp/oracle/check.ts",
+            "kind": "hidden",
+            "repeat": 0,
+            "returncode": 0
+          }
+        ]
+      },
+      "patch_bytes": 9317
+    },
+    {
+      "task_id": "dev-typescript",
+      "system": "mini-swe-agent",
+      "termination": "completed",
+      "controller_termination": "completed",
+      "elapsed_s": 687.3334337209817,
+      "evaluation_elapsed_s": 204.79477516398765,
+      "cost_usd": 0.030869,
+      "cost_is_conservative": false,
+      "request_count": 32,
+      "new_failing_check_commands": [],
+      "verification": {
+        "pass": true,
+        "reason": "verification",
+        "checks": [
+          {
+            "command": "npm run build",
+            "kind": "trusted",
+            "repeat": 0,
+            "returncode": 0
+          },
+          {
+            "command": "node --import=tsx/esm --test --test-timeout=60000 test/*.ts",
+            "kind": "trusted",
+            "repeat": 0,
+            "returncode": 0
+          },
+          {
+            "command": "node --import=tsx/esm /tmp/oracle/check.ts",
+            "kind": "hidden",
+            "repeat": 0,
+            "returncode": 0
+          }
+        ]
+      },
+      "patch_bytes": 2194
+    }
+  ],
+  "engine_lifecycle": {
+    "dev-python": {
+      "started": [
+        {
+          "profile": "ask",
+          "worktree": "/task"
+        },
+        {
+          "profile": "coder",
+          "worktree": "/task"
+        },
+        {
+          "profile": "reviewer",
+          "worktree": "/task"
+        },
+        {
+          "profile": "tester",
+          "worktree": "/task"
+        }
+      ],
+      "finished": [
+        {
+          "profile": "ask",
+          "status": "ok"
+        },
+        {
+          "profile": "coder",
+          "status": "ok"
+        },
+        {
+          "profile": "reviewer",
+          "status": "ok"
+        },
+        {
+          "profile": "tester",
+          "status": "ok"
+        }
+      ]
+    },
+    "dev-typescript": {
+      "started": [
+        {
+          "profile": "ask",
+          "worktree": "/task"
+        },
+        {
+          "profile": "coder",
+          "worktree": "/task"
+        }
+      ],
+      "finished": [
+        {
+          "profile": "ask",
+          "status": "ok"
+        },
+        {
+          "profile": "coder",
+          "status": "max_turns"
+        }
+      ]
+    }
+  },
+  "native_command_timeouts": [
+    {
+      "task_id": "dev-typescript",
+      "command": "npm test",
+      "requested_timeout_s": 300,
+      "duration_ms": 120099,
+      "preview": "$ npm test\nexit code: -15  (120.1s)\n(timed out after 120s; process group killed)\n--- stdout ---\n\n> p-queue@10.0.0 test\n> xo && node --import=tsx/esm --test --test-timeout=60000 test/*.ts && del-cli dist && tsc && nz\n\n\n  test/advanced.ts:1581:1\n  ⚠  1581:1  File has too many lines (2394). Maximum allowed is 1500.  max-lines\n\n  test/basic.ts:1569:1\n  ⚠  1569:1  File has too many lines (1730). Maximu…"
+    },
+    {
+      "task_id": "dev-typescript",
+      "command": "npm test",
+      "requested_timeout_s": 300,
+      "duration_ms": 120025,
+      "preview": "$ npm test\nexit code: -15  (120.0s)\n(timed out after 120s; process group killed)\n--- stdout ---\n\n> p-queue@10.0.0 test\n> xo && node --import=tsx/esm --test --test-timeout=60000 test/*.ts && del-cli dist && tsc && nz\n\n\n  test/advanced.ts:1581:1\n  ⚠  1581:1  File has too many lines (2394). Maximum allowed is 1500.  max-lines\n\n  test/basic.ts:1569:1\n  ⚠  1569:1  File has too many lines (1730). Maximu…"
+    }
+  ],
+  "typescript_lsp_observations": [
+    {
+      "task_id": "dev-typescript",
+      "system": "engine-core",
+      "observed_at": "2026-10-14T22:54:00.615106+00:00",
+      "process_ids": {
+        "typescript_language_server": [
+          147041
+        ],
+        "tsserver": [
+          147058,
+          147059
+        ],
+        "typings_installer": [
+          147078
+        ]
+      }
+    },
+    {
+      "task_id": "dev-typescript",
+      "system": "engine-core",
+      "phase": "coder",
+      "observed_at": "2026-10-14T22:58:40.630978+00:00",
+      "process_ids": {
+        "typescript_language_server": [
+          147041
+        ],
+        "tsserver": [
+          147058,
+          147059
+        ],
+        "typings_installer": [
+          147078
+        ]
+      }
+    }
+  ]
+}
