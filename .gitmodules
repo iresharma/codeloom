@@ -17,3 +17,6 @@
 [submodule "workspace/web"]
 	path = workspace/web
 	url = git@github.com:iresharma/codeloom.web.git
+[submodule "workspace/benchmark"]
+	path = workspace/benchmark
+	url = git@github.com:iresharma/codeloom.benchmark.git
