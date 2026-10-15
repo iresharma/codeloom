@@ -1,0 +1,262 @@
+{
+  "benchmark_commit": "ad49a4dbba4272d7fe314669828608591bb0f6bf",
+  "engine_commit": "677cfbeca7525ae4e66475be0566703d7b1831f0",
+  "native_lint_passed": true,
+  "runs": [
+    {
+      "variant": "base",
+      "repeat": 0,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 1,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 2,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 3,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 4,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 5,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 6,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 7,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 8,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 9,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 10,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 11,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 12,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 13,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 14,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 15,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 16,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 17,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 18,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 19,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 20,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 21,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 22,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 23,
+      "returncode": 0
+    },
+    {
+      "variant": "base",
+      "repeat": 24,
+      "returncode": 0
+    },
+    {
+      "variant": "unlimited-rate-mutant",
+      "returncode": 1,
+      "output": "✖ strict mode multiple complete intervals (22.758257ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 528.237966\n\n✖ failing tests:\n\ntest at test/strict.ts:1:8815\n✖ strict mode multiple complete intervals (22.758257ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  12 !== 3\n  \n      at assert.<computed> [as strictEqual] (node:internal/test_runner/test:325:18)\n      at TestContext.<anonymous> (/task/test/strict.ts:523:11)\n      at async Test.run (node:internal/test_runner/test:1113:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 12,\n    expected: 3,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n"
+    },
+    {
+      "variant": "reference",
+      "repeat": 0,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 1,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 2,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 3,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 4,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 5,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 6,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 7,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 8,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 9,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 10,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 11,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 12,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 13,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 14,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 15,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 16,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 17,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 18,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 19,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 20,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 21,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 22,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 23,
+      "returncode": 0
+    },
+    {
+      "variant": "reference",
+      "repeat": 24,
+      "returncode": 0
+    }
+  ]
+}
