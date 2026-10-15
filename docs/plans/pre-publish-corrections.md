@@ -1,3 +1,10 @@
+**Status: resolved and published, 2026-10-16.** All items below are fixed in
+`codeloom.benchmark` (`bcc59e9`) and `codeloom.pages` (`609ef1b`), live at
+https://codeloom.iresharma.com/engine/results. Final verdict: 8/9 pass each
+system, `chi-N` the sole fail for both (owner-approved: `task_id` strictness
+stands, `allowed_paths` strictness does not). See commits for the exact
+reasoning on each call.
+
 # Pre-publish corrections for `runs/railway-v1-restart-20261015`
 
 Owner instruction (2026-10-15): keep a running note of every harness bug and
