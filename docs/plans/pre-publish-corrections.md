@@ -42,6 +42,24 @@ cancelled — staying on Railway.
   `engine-events.jsonl` for expected sub-agent completion events, which is
   new scope beyond what was found this session.
 
+**Certification speed, 2026-10-16** (separate follow-up): `Dockerfile` used
+to `COPY engine /opt/engine` into the shared base/task image layers, so
+*any* Engine commit change produced a new base image digest and forced a
+full recertification of every task, even though certification never
+actually runs Engine at all (noop/reference/mutant checks are pure fixture
+validation against generic language tooling). Fixed: Engine's source is now
+bind-mounted into `/opt/engine` at `docker run` time (`sandbox.py:
+start_container`, used for `engine-core` attempts only) instead of baked
+into the image. `prepare_runtime` still records `engine_commit`/
+`engine_files`/`engine_dirty` in `.cache/runtime.json` for provenance; since
+the checkout can now drift between certify-time and run-time (previously
+impossible by construction), `start_container` enforces that the mounted
+Engine commit matches what was certified and is clean, refusing otherwise.
+Verified end to end on the Railway sandbox: the runtime image digest is
+byte-identical before and after an Engine-only source change, the mount
+correctly exposes the full Engine tree inside the container, and a
+drifted/dirty checkout is correctly refused.
+
 # Pre-publish corrections for `runs/railway-v1-restart-20261015`
 
 Owner instruction (2026-10-15): keep a running note of every harness bug and
