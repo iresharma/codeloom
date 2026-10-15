@@ -7,8 +7,10 @@ Project: https://railway.com/project/004efac5-5901-4e79-a995-46661838f9aa
 - Monitor service: `b389235a-38a3-45d3-8af4-fb4c846a5b9f`.
 - Monitor: https://benchmark-monitor-production.up.railway.app/.
 - Persistent monitor volume: `0fa63413-333d-499a-8d53-ab030c91b4c7`, mounted at `/data`.
-- Worker checkout: `/root/codeloom/workspace/benchmark`; current campaign source is benchmark `a9100f796a3a3af87425c312e3539fc43ba46249` with Engine `677cfbeca7525ae4e66475be0566703d7b1831f0` (updated after the calibration, timing-fixture repair and explicit timing-reuse policy below).
-- Source branches: benchmark `codex/railway-benchmark`, engine `codex/railway-benchmark-runtime`, pages `codex/railway-live-results` (now static).
+- Worker checkout: `/root/codeloom/workspace/benchmark`; the paused worker last used benchmark `a9100f796a3a3af87425c312e3539fc43ba46249` with Engine `677cfbeca7525ae4e66475be0566703d7b1831f0`.
+- Current source branch: `main` in the parent repository and all seven primary workspace repositories. Benchmark `main` includes `e6f92d4b7b1096162fb5ec8781b9e8d651a81675`; Engine `main` includes `677cfbeca7525ae4e66475be0566703d7b1831f0`; pages `main` includes the static-site revision `f1b6b74`.
+
+On 2026-10-15, the current workspace branches were consolidated onto `main` with fast-forwards. The parent repository's erroneous shared `core.worktree` setting, which pointed at a nested web directory and made existing files appear deleted, was removed. Original Git metadata, branch tips, patches and untracked files were backed up before repair. Historical launcher copies below remain evidence of previous executions; their feature-branch push targets are obsolete. The next Railway restart must use `main`, the current benchmark source, no automatic compatibility probes, and reused calibration timing. Railway remains paused pending that restart.
 
 The owner authorized Railway execution on 2026-10-14 and requested a summary before paid runs. The official campaign waits for `.cache/cloud/paid-start-authorized`; never create it before delivering the current protocol/budget summary. At that initial deployment checkpoint, no official calibration or measured attempts had started. Later calibration attempts are recorded below.
 
