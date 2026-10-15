@@ -5,6 +5,43 @@ system, `chi-N` the sole fail for both (owner-approved: `task_id` strictness
 stands, `allowed_paths` strictness does not). See commits for the exact
 reasoning on each call.
 
+**Follow-up hardening, 2026-10-16** (commit TBD at push time): the owner
+asked to fix the remaining known gaps for the *next* campaign (the fixes
+above only covered the already-run v1 report; they couldn't change
+`codeloom_benchmark/*.py` without invalidating that campaign's
+preregistration). Home-k8s migration was considered and explicitly
+cancelled — staying on Railway.
+
+- `runner.py` now sends `disclosed_prompt(task)` instead of the raw
+  `task["prompt"]` to both agents: states the real `allowed_paths` globs,
+  and for navigation-category tasks, the exact `task_id` string the schema
+  requires. This is the root fix for the `tinydb-X`/`chi-N` class of bug —
+  future agents can actually comply with constraints that were previously
+  silent grading-time-only rules.
+- `broker.py`'s `BudgetRefused` handler now writes `exc.reason` directly as
+  the journal `status` instead of collapsing every reason but
+  `call_cost_limit`/`token_denied` into generic `"budget_exhausted"`.
+  `ledger.py`'s reasons (`overrun_halt`, `protocol_violation_halt`,
+  `unknown_bills_halt`, `budget_pending`, plus the pre-existing ones) now
+  flow through end to end.
+- `runner.py`'s termination-override only treats genuine admission-halt
+  reasons (`ADMISSION_HALT_STATUSES`: `budget_exhausted`, `overrun_halt`,
+  `protocol_violation_halt`, `unknown_bills_halt`) as overriding a
+  controller's own outcome. `budget_pending` — the same-trial in-flight-bill
+  race that caused `dotenv-X`/`engine-core`'s mislabel — is deliberately
+  excluded: it resolves on its own and must not stomp a `completed`
+  termination the controller already reported.
+- Every `attempt()` result now carries `admission_events`: the full set of
+  distinct non-`complete` journal statuses for that trial, so a mix of
+  events isn't silently collapsed to whichever one happened to win the
+  (still single-valued) `termination` field's priority chain.
+- Explicitly left as a documented limitation, not fixed: Engine's
+  `completed` termination is only `process.returncode == 0`, not a check
+  that its internal tester/reviewer sub-agents actually ran (see
+  `railway-benchmark.md`'s 2026-10-15 entry) — fixing this needs parsing
+  `engine-events.jsonl` for expected sub-agent completion events, which is
+  new scope beyond what was found this session.
+
 # Pre-publish corrections for `runs/railway-v1-restart-20261015`
 
 Owner instruction (2026-10-15): keep a running note of every harness bug and
