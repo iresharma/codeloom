@@ -150,11 +150,9 @@ def main():
         if check_pricing()["status"] != "passed":
             raise ValueError("Pinned provider price exceeds the fixed admission rates")
         # A dedicated ledger, NOT the shared .cache/campaign/ledger.sqlite the
-        # v1 campaign uses: that ledger's "development" stage has only a few
-        # dollars of headroom left from the real campaign's own dev/
-        # calibration spend, and this exploratory suite shouldn't compete
-        # with or be constrained by the real benchmark's budget tracking at
-        # all. Same Broker/Ledger/Network classes, same actual-spend policy,
+        # v1 campaign uses: this exploratory suite shouldn't compete with or
+        # be constrained by the real benchmark's budget tracking at all.
+        # Same Broker/Ledger/Network classes, same actual-spend policy,
         # fully isolated state.
         ledger = Ledger(
             RUN / "ledger.sqlite",
@@ -191,7 +189,15 @@ def main():
                         network,
                         RUN,
                         trial_id,
-                        "development",
+                        # "measured", not "development": reporting.summarize()
+                        # (what the live monitor's paired-outcomes table reads)
+                        # only counts stage in ("measured", "recovery") --
+                        # "development" attempts are invisible there even once
+                        # sealed. Safe here because the ledger above is this
+                        # run's own, fully isolated instance: "measured"
+                        # just selects its $32 bucket over its $8
+                        # "development" one, never the real v1 campaign's.
+                        "measured",
                         None,  # no watchdog, same policy as the v1 campaign
                         PER_ATTEMPT_LIMIT_USD,
                     )
