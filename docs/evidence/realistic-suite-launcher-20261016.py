@@ -18,6 +18,7 @@ from __future__ import annotations
 import functools
 import json
 import os
+import signal
 import sys
 import threading
 import time
@@ -27,6 +28,17 @@ ROOT = Path("/root/codeloom/workspace/benchmark")
 SUITE = "realistic"
 RUN = ROOT / "runs/realistic-v1"
 PER_ATTEMPT_LIMIT_USD = 2.0  # generous for a 6-7 file feature task; development stage, not part of the v1 measured budget
+
+# Python installs no handler for SIGTERM by default, so `kill <pid>` (unlike
+# Ctrl-C/SIGINT) terminates the process immediately at the C level, skipping
+# every try/finally -- including the one that restores the real v1
+# campaign's reports/certification.json from its backup below. Convert it
+# into an ordinary Python exception so that restore always runs.
+def _raise_on_sigterm(signum, frame):
+    raise SystemExit(1)
+
+
+signal.signal(signal.SIGTERM, _raise_on_sigterm)
 
 
 def main():
