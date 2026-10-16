@@ -58,7 +58,7 @@ def main():
         config,
         model_metadata,
     )
-    from codeloom_benchmark.campaign import credentials
+    from codeloom_benchmark.campaign import credentials, parallel_pair
     from codeloom_benchmark.broker import Broker
     from codeloom_benchmark.ledger import Ledger
     from codeloom_benchmark.sandbox import Network
@@ -174,12 +174,18 @@ def main():
             w.state.update(phase="measuring", message="Running the realistic suite against both systems")
         try:
             for task in task_rows:
-                for system in settings["systems"]:
+                # Both systems for a task run concurrently via the same
+                # parallel_pair() the real v1 campaign uses for
+                # parallel_attempts: 2 -- at most one matched pair in flight
+                # at a time (one ThreadPoolExecutor per task, not a single
+                # pool spanning the whole suite), tasks themselves still run
+                # one after another.
+                def execute(system, task=task):
                     trial_id = f"{RUN.name}-{task['id']}-{system}"
                     path = RUN / "trials" / trial_id / "result.json"
                     if path.exists():
                         print("already sealed, skipping:", trial_id, flush=True)
-                        continue
+                        return None
                     print("running:", trial_id, flush=True)
                     result = attempt(
                         task,
@@ -202,6 +208,9 @@ def main():
                         PER_ATTEMPT_LIMIT_USD,
                     )
                     print(trial_id, result["termination"], f"${result['cost_usd']:.4f}" if result["cost_usd"] is not None else "$?", flush=True)
+                    return result
+
+                parallel_pair(settings["systems"], execute)
         finally:
             network.close()
             broker.close()
