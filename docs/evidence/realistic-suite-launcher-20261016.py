@@ -19,6 +19,7 @@ import functools
 import json
 import os
 import signal
+import sqlite3
 import sys
 import threading
 import time
@@ -181,34 +182,50 @@ def main():
                 # pool spanning the whole suite), tasks themselves still run
                 # one after another.
                 def execute(system, task=task):
-                    trial_id = f"{RUN.name}-{task['id']}-{system}"
-                    path = RUN / "trials" / trial_id / "result.json"
-                    if path.exists():
-                        print("already sealed, skipping:", trial_id, flush=True)
-                        return None
-                    print("running:", trial_id, flush=True)
-                    result = attempt(
-                        task,
-                        system,
-                        images[task["id"]],
-                        broker,
-                        network,
-                        RUN,
-                        trial_id,
-                        # "measured", not "development": reporting.summarize()
-                        # (what the live monitor's paired-outcomes table reads)
-                        # only counts stage in ("measured", "recovery") --
-                        # "development" attempts are invisible there even once
-                        # sealed. Safe here because the ledger above is this
-                        # run's own, fully isolated instance: "measured"
-                        # just selects its $32 bucket over its $8
-                        # "development" one, never the real v1 campaign's.
-                        "measured",
-                        None,  # no watchdog, same policy as the v1 campaign
-                        PER_ATTEMPT_LIMIT_USD,
-                    )
-                    print(trial_id, result["termination"], f"${result['cost_usd']:.4f}" if result["cost_usd"] is not None else "$?", flush=True)
-                    return result
+                    base_id = f"{RUN.name}-{task['id']}-{system}"
+                    # A trial the ledger already has a row for (e.g. one this
+                    # session interrupted earlier, whose on-disk trial
+                    # directory was removed without a matching ledger row
+                    # deletion) makes create_trial() raise a UNIQUE
+                    # constraint error on the plain id. Retry under a
+                    # suffixed id instead of touching the ledger's own
+                    # tables directly.
+                    for suffix in range(1, 6):
+                        trial_id = base_id if suffix == 1 else f"{base_id}-retry{suffix}"
+                        path = RUN / "trials" / trial_id / "result.json"
+                        if path.exists():
+                            print("already sealed, skipping:", trial_id, flush=True)
+                            return None
+                        print("running:", trial_id, flush=True)
+                        try:
+                            result = attempt(
+                                task,
+                                system,
+                                images[task["id"]],
+                                broker,
+                                network,
+                                RUN,
+                                trial_id,
+                                # "measured", not "development": reporting.summarize()
+                                # (what the live monitor's paired-outcomes table reads)
+                                # only counts stage in ("measured", "recovery") --
+                                # "development" attempts are invisible there even once
+                                # sealed. Safe here because the ledger above is this
+                                # run's own, fully isolated instance: "measured"
+                                # just selects its $32 bucket over its $8
+                                # "development" one, never the real v1 campaign's.
+                                "measured",
+                                None,  # no watchdog, same policy as the v1 campaign
+                                PER_ATTEMPT_LIMIT_USD,
+                            )
+                        except sqlite3.IntegrityError as exc:
+                            if "trials.id" not in str(exc):
+                                raise
+                            print("trial id already claimed in the ledger, retrying with a new id:", trial_id, flush=True)
+                            continue
+                        print(trial_id, result["termination"], f"${result['cost_usd']:.4f}" if result["cost_usd"] is not None else "$?", flush=True)
+                        return result
+                    raise RuntimeError(f"Could not find a free trial id for {base_id}")
 
                 parallel_pair(settings["systems"], execute)
         finally:
